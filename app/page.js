@@ -367,8 +367,9 @@ export default function Home() {
       newObj[`${next.rowIndex}-${next.colIndex}`] = 1;
     }
     //check if word exists
-    if (wordsToFind.includes(word)) {
+    if (wordsToFind.find(w => w.word === word)) {
       setCompletedWords(newObj);
+      setWordsToFind([...wordsToFind, {...wordsToFind.find((w) => w.word === word).complete = true}])
     }
     return word;
   };
@@ -389,48 +390,7 @@ export default function Home() {
   }, [isHighlighting]);
 
   useEffect(() => {
-    const letters = [
-      "A",
-      "B",
-      "C",
-      "D",
-      "E",
-      "F",
-      "G",
-      "H",
-      "I",
-      "J",
-      "K",
-      "L",
-      "M",
-      "N",
-      "O",
-      "P",
-      "Q",
-      "R",
-      "S",
-      "T",
-      "U",
-      "V",
-      "W",
-      "X",
-      "Y",
-      "Z",
-    ];
-
-    function generateRandomLetters() {
-      let rand = [];
-      for (let i = 0; i < 20; i++) {
-        let row = [];
-        for (let j = 0; j < 15; j++) {
-          row.push(letters[Math.floor(Math.random() * letters.length)]);
-        }
-        rand.push(row);
-      }
-      return rand;
-    }
-
-    let wordsToFind = [
+    let listOfWords = [
       "MOUSE",
       "RABBIT",
       "DRAGON",
@@ -443,10 +403,27 @@ export default function Home() {
       "TIGER",
       "DOG",
       "SHEEP",
+      "LION",
+      "ELEPHANT",
+      "LEOPARD",
+      "GIRAFFE",
+      "KANGAROO",
+      "CROCODILE",
+      "PENGUIN",
+      "CHEETAH",
+      "GORILLA",
+      "HIPPOPOTAMUS",
+      "RHINOCEROS",
+      "WOLF",
+      "ZEBRA",
+      "BEAR",
+      "EAGLE",
+      "FOX",
+      "DOLPHIN",
+      "PANTHER",
     ];
-    let wordSearch = generateRandomLetters();
-    setWordsToFind(wordsToFind);
-    setRandLetters(placeWordsInGrid(wordsToFind, wordSearch));
+
+    setRandLetters(placeWordsInGrid(listOfWords, 20, 15));
     setLoading(false);
   }, []);
 
@@ -475,9 +452,14 @@ export default function Home() {
     return false; // Word goes out of the grid
   }
 
-  function placeWordsInGrid(words, grid) {
-    const numRows = grid.length;
-    const numCols = grid[0].length;
+  function generateRandomLetter() {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+
+  function placeWordsInGrid(words, numRows, numCols) {
+    let wordsPlaced = [];
+    const grid = Array.from({ length: numRows }, () => Array(numCols).fill(""));
     const directions = [
       [-1, 0], // Up
       [1, 0], // Down
@@ -494,12 +476,9 @@ export default function Home() {
         directions[Math.floor(Math.random() * directions.length)];
       let startRow, startCol;
       let attempts = 0;
+      let placed = false;
 
-      while (attempts < 100) {
-        if (attempts === 99) {
-          let newWords = words.filter((w) => w !== word)
-          setWordsToFind(newWords);
-        }
+      while (attempts < 50 && wordsPlaced.length !== 15) {
         startRow = Math.floor(Math.random() * numRows);
         startCol = Math.floor(Math.random() * numCols);
 
@@ -510,13 +489,24 @@ export default function Home() {
           for (let i = 0; i < word.length; i++) {
             const row = startRow + i * direction[0];
             const col = startCol + i * direction[1];
-            console.log(`${word} at ${row}, ${col}`);
+            // console.log(`${word} at ${row}, ${col}`);
             grid[row][col] = word[i];
           }
+          wordsPlaced.push({word: word, complete: false});
+          placed = true;
           break;
         }
-
         attempts++;
+      }
+    }
+    setWordsToFind(wordsPlaced);
+
+    // Fill remaining empty cells with random letters
+    for (let row = 0; row < numRows; row++) {
+      for (let col = 0; col < numCols; col++) {
+        if (grid[row][col] === "") {
+          grid[row][col] = generateRandomLetter();
+        }
       }
     }
 
@@ -527,15 +517,17 @@ export default function Home() {
     return <div>loading</div>;
   } else {
     return (
-      <div className="flex justify-center items-center">
-        <div>
-          {wordsToFind.map((word) => (
-            <div key={word}>
-              <p className="text-lg">{word}</p>
+      <div  className="flex flex-col items-center mt-10">
+      <h1 className="text-lg font-bold">Word Search</h1>
+      <div className="flex justify-center items-center gap-10">
+        <div className="border-slate-800 border p-2">
+          {wordsToFind.map((word, index) => (
+            <div key={index}>
+              <p className={`text-lg ${word.complete && 'line-through'}`}>{word.word}</p>
             </div>
           ))}
         </div>
-        <div className=" border-slate-800 border w-4/6 p-10">
+        <div className="border-slate-800 border my-10 p-2">
           {/* <h1>Word Search Game</h1> */}
           <WordSearchGrid
             isHighlighted={checkIfHighlighted}
@@ -545,6 +537,7 @@ export default function Home() {
             isComplete={checkIfComplete}
           />
         </div>
+      </div>
       </div>
     );
   }
