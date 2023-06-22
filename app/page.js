@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Letter from "./components/Letter";
-import Array2DRenderer from "./components/Array2D";
 import WordSearchGrid from "./components/WordSearchGrid";
+
 export default function Home() {
   const [randLetters, setRandLetters] = useState();
   const [loading, setLoading] = useState(true);
@@ -35,24 +34,39 @@ export default function Home() {
   function horizontalLeft(rowIndex, colIndex, lastIndex) {
     if (
       rowIndex === highlightedCells[0].rowIndex &&
-      highlightedCells[lastIndex].colIndex - 1 === colIndex &&
+      highlightedCells[lastIndex].colIndex > colIndex &&
       !checkIfHighlighted(rowIndex, colIndex)
     ) {
-      setHighlightedCells([
-        ...highlightedCells,
-        { rowIndex: rowIndex, colIndex: colIndex },
-      ]);
+      let highlighted = [...highlightedCells];
+      let currCol = highlightedCells[lastIndex].colIndex;
+      while (currCol !== colIndex) {
+        currCol--;
+        highlighted.push({ rowIndex: rowIndex, colIndex: currCol });
+      }
+      setHighlightedCells(highlighted);
     }
     //remove
     else if (
       rowIndex === highlightedCells[0].rowIndex &&
-      highlightedCells[lastIndex].colIndex + 1 === colIndex &&
+      highlightedCells[lastIndex].colIndex < colIndex &&
       checkIfHighlighted(rowIndex, colIndex)
     ) {
-      let newArr = highlightedCells.slice(0, lastIndex);
-      setHighlightedCells(newArr);
-      if (newArr.length === 1) {
+      if (colIndex === highlightedCells[0].colIndex) {
+        setHighlightedCells([
+          {
+            rowIndex: highlightedCells[0].rowIndex,
+            colIndex: highlightedCells[0].colIndex,
+          },
+        ]);
         setDirection(null);
+      } else {
+        let highlighted = [...highlightedCells];
+        let currCol = highlightedCells[lastIndex].colIndex;
+        while (currCol !== colIndex) {
+          highlighted.pop();
+          currCol++;
+        }
+        setHighlightedCells(highlighted);
       }
     }
   }
@@ -60,24 +74,39 @@ export default function Home() {
   function horizontalRight(rowIndex, colIndex, lastIndex) {
     if (
       rowIndex === highlightedCells[0].rowIndex &&
-      highlightedCells[lastIndex].colIndex + 1 === colIndex &&
+      highlightedCells[lastIndex].colIndex < colIndex &&
       !checkIfHighlighted(rowIndex, colIndex)
     ) {
-      setHighlightedCells([
-        ...highlightedCells,
-        { rowIndex: rowIndex, colIndex: colIndex },
-      ]);
+      let highlighted = [...highlightedCells];
+      let currCol = highlightedCells[lastIndex].colIndex;
+      while (currCol !== colIndex) {
+        currCol++;
+        highlighted.push({ rowIndex: rowIndex, colIndex: currCol });
+      }
+      setHighlightedCells(highlighted);
     }
     //remove
     else if (
       rowIndex === highlightedCells[0].rowIndex &&
-      highlightedCells[lastIndex].colIndex - 1 === colIndex &&
+      highlightedCells[lastIndex].colIndex > colIndex &&
       checkIfHighlighted(rowIndex, colIndex)
     ) {
-      let newArr = highlightedCells.slice(0, lastIndex);
-      setHighlightedCells(newArr);
-      if (newArr.length === 1) {
+      if (colIndex === highlightedCells[0].colIndex) {
+        setHighlightedCells([
+          {
+            rowIndex: highlightedCells[0].rowIndex,
+            colIndex: highlightedCells[0].colIndex,
+          },
+        ]);
         setDirection(null);
+      } else {
+        let highlighted = [...highlightedCells];
+        let currCol = highlightedCells[lastIndex].colIndex;
+        while (currCol !== colIndex) {
+          highlighted.pop();
+          currCol--;
+        }
+        setHighlightedCells(highlighted);
       }
     }
   }
@@ -85,22 +114,37 @@ export default function Home() {
   function verticalDown(rowIndex, colIndex, lastIndex) {
     if (
       colIndex === highlightedCells[0].colIndex &&
-      highlightedCells[lastIndex].rowIndex + 1 === rowIndex
+      highlightedCells[lastIndex].rowIndex < rowIndex
     ) {
-      setHighlightedCells([
-        ...highlightedCells,
-        { rowIndex: rowIndex, colIndex: colIndex },
-      ]);
+      let highlighted = [...highlightedCells];
+      let currRow = highlightedCells[lastIndex].rowIndex;
+      while (currRow !== rowIndex) {
+        currRow++;
+        highlighted.push({ rowIndex: currRow, colIndex: colIndex });
+      }
+      setHighlightedCells(highlighted);
     }
     //remove
     else if (
       colIndex === highlightedCells[0].colIndex &&
-      highlightedCells[lastIndex].rowIndex - 1 === rowIndex
+      highlightedCells[lastIndex].rowIndex > rowIndex
     ) {
-      let newArr = highlightedCells.slice(0, lastIndex);
-      setHighlightedCells(newArr);
-      if (newArr.length === 1) {
+      if (rowIndex === highlightedCells[0].rowIndex) {
+        setHighlightedCells([
+          {
+            rowIndex: highlightedCells[0].rowIndex,
+            colIndex: highlightedCells[0].colIndex,
+          },
+        ]);
         setDirection(null);
+      } else {
+        let highlighted = [...highlightedCells];
+        let currRow = highlightedCells[lastIndex].rowIndex;
+        while (currRow !== rowIndex) {
+          highlighted.pop();
+          currRow--;
+        }
+        setHighlightedCells(highlighted);
       }
     }
   }
@@ -108,119 +152,222 @@ export default function Home() {
   function verticalUp(rowIndex, colIndex, lastIndex) {
     if (
       colIndex === highlightedCells[0].colIndex &&
-      highlightedCells[lastIndex].rowIndex - 1 === rowIndex
+      highlightedCells[lastIndex].rowIndex > rowIndex
     ) {
-      setHighlightedCells([
-        ...highlightedCells,
-        { rowIndex: rowIndex, colIndex: colIndex },
-      ]);
+      let highlighted = [...highlightedCells];
+      let currRow = highlightedCells[lastIndex].rowIndex;
+      while (currRow !== rowIndex) {
+        currRow--;
+        highlighted.push({ rowIndex: currRow, colIndex: colIndex });
+      }
+      setHighlightedCells(highlighted);
     }
     //remove
     else if (
       colIndex === highlightedCells[0].colIndex &&
-      highlightedCells[lastIndex].rowIndex + 1 === rowIndex
+      highlightedCells[lastIndex].rowIndex < rowIndex
     ) {
-      let newArr = highlightedCells.slice(0, lastIndex);
-      setHighlightedCells(newArr);
-      if (newArr.length === 1) {
+      if (rowIndex === highlightedCells[0].rowIndex) {
+        setHighlightedCells([
+          {
+            rowIndex: highlightedCells[0].rowIndex,
+            colIndex: highlightedCells[0].colIndex,
+          },
+        ]);
         setDirection(null);
+      } else {
+        let highlighted = [...highlightedCells];
+        let currRow = highlightedCells[lastIndex].rowIndex;
+        while (currRow !== rowIndex) {
+          highlighted.pop();
+          currRow++;
+        }
+        setHighlightedCells(highlighted);
       }
     }
   }
 
   function downRight(rowIndex, colIndex, lastIndex) {
     if (
-      rowIndex === highlightedCells[lastIndex].rowIndex + 1 &&
-      highlightedCells[lastIndex].colIndex + 1 === colIndex &&
+      highlightedCells[lastIndex].rowIndex < rowIndex &&
+      highlightedCells[lastIndex].colIndex < colIndex &&
       !checkIfHighlighted(rowIndex, colIndex)
     ) {
-      setHighlightedCells([
-        ...highlightedCells,
-        { rowIndex: rowIndex, colIndex: colIndex },
-      ]);
+      let highlighted = [...highlightedCells];
+      let currRow = highlightedCells[lastIndex].rowIndex;
+      let currCol = highlightedCells[lastIndex].colIndex;
+      while (currRow !== rowIndex && currCol !== colIndex) {
+        currRow++;
+        currCol++;
+        highlighted.push({ rowIndex: currRow, colIndex: currCol });
+      }
+      setHighlightedCells(highlighted);
     }
     //remove
     else if (
-      rowIndex === highlightedCells[lastIndex].rowIndex - 1 &&
-      highlightedCells[lastIndex].colIndex - 1 === colIndex &&
+      highlightedCells[lastIndex].rowIndex > rowIndex &&
+      highlightedCells[lastIndex].colIndex > colIndex &&
       checkIfHighlighted(rowIndex, colIndex)
     ) {
-      let newArr = highlightedCells.slice(0, lastIndex);
-      setHighlightedCells(newArr);
-      if (newArr.length === 1) {
+      if (
+        rowIndex === highlightedCells[0].rowIndex &&
+        colIndex === highlightedCells[0].colIndex
+      ) {
+        setHighlightedCells([
+          {
+            rowIndex: highlightedCells[0].rowIndex,
+            colIndex: highlightedCells[0].colIndex,
+          },
+        ]);
         setDirection(null);
+      } else {
+        let highlighted = [...highlightedCells];
+        let currRow = highlightedCells[lastIndex].rowIndex;
+        let currCol = highlightedCells[lastIndex].colIndex;
+        while (currRow !== rowIndex && currCol !== colIndex) {
+          highlighted.pop();
+          currRow--;
+          currCol--;
+        }
+        setHighlightedCells(highlighted);
       }
     }
   }
   function downLeft(rowIndex, colIndex, lastIndex) {
     if (
-      rowIndex === highlightedCells[lastIndex].rowIndex + 1 &&
-      highlightedCells[lastIndex].colIndex - 1 === colIndex &&
+      highlightedCells[lastIndex].rowIndex < rowIndex &&
+      highlightedCells[lastIndex].colIndex > colIndex &&
       !checkIfHighlighted(rowIndex, colIndex)
     ) {
-      setHighlightedCells([
-        ...highlightedCells,
-        { rowIndex: rowIndex, colIndex: colIndex },
-      ]);
+      let highlighted = [...highlightedCells];
+      let currRow = highlightedCells[lastIndex].rowIndex;
+      let currCol = highlightedCells[lastIndex].colIndex;
+      while (currRow !== rowIndex && currCol !== colIndex) {
+        currRow++;
+        currCol--;
+        highlighted.push({ rowIndex: currRow, colIndex: currCol });
+      }
+      setHighlightedCells(highlighted);
     }
     //remove
     else if (
-      rowIndex === highlightedCells[lastIndex].rowIndex - 1 &&
-      highlightedCells[lastIndex].colIndex + 1 === colIndex &&
+      highlightedCells[lastIndex].rowIndex > rowIndex &&
+      highlightedCells[lastIndex].colIndex < colIndex &&
       checkIfHighlighted(rowIndex, colIndex)
     ) {
-      let newArr = highlightedCells.slice(0, lastIndex);
-      setHighlightedCells(newArr);
-      if (newArr.length === 1) {
+      if (
+        rowIndex === highlightedCells[0].rowIndex &&
+        colIndex === highlightedCells[0].colIndex
+      ) {
+        setHighlightedCells([
+          {
+            rowIndex: highlightedCells[0].rowIndex,
+            colIndex: highlightedCells[0].colIndex,
+          },
+        ]);
         setDirection(null);
+      } else {
+        let highlighted = [...highlightedCells];
+        let currRow = highlightedCells[lastIndex].rowIndex;
+        let currCol = highlightedCells[lastIndex].colIndex;
+        while (currRow !== rowIndex && currCol !== colIndex) {
+          highlighted.pop();
+          currRow--;
+          currCol++;
+        }
+        setHighlightedCells(highlighted);
       }
     }
   }
   function upRight(rowIndex, colIndex, lastIndex) {
     if (
-      rowIndex === highlightedCells[lastIndex].rowIndex - 1 &&
-      highlightedCells[lastIndex].colIndex + 1 === colIndex &&
+      highlightedCells[lastIndex].rowIndex > rowIndex &&
+      highlightedCells[lastIndex].colIndex < colIndex &&
       !checkIfHighlighted(rowIndex, colIndex)
     ) {
-      setHighlightedCells([
-        ...highlightedCells,
-        { rowIndex: rowIndex, colIndex: colIndex },
-      ]);
+      let highlighted = [...highlightedCells];
+      let currRow = highlightedCells[lastIndex].rowIndex;
+      let currCol = highlightedCells[lastIndex].colIndex;
+      while (currRow !== rowIndex && currCol !== colIndex) {
+        currRow--;
+        currCol++;
+        highlighted.push({ rowIndex: currRow, colIndex: currCol });
+      }
+      setHighlightedCells(highlighted);
     }
     //remove
     else if (
-      rowIndex === highlightedCells[lastIndex].rowIndex + 1 &&
-      highlightedCells[lastIndex].colIndex - 1 === colIndex &&
+      highlightedCells[lastIndex].rowIndex < rowIndex &&
+      highlightedCells[lastIndex].colIndex > colIndex &&
       checkIfHighlighted(rowIndex, colIndex)
     ) {
-      let newArr = highlightedCells.slice(0, lastIndex);
-      setHighlightedCells(newArr);
-      if (newArr.length === 1) {
+      if (
+        rowIndex === highlightedCells[0].rowIndex &&
+        colIndex === highlightedCells[0].colIndex
+      ) {
+        setHighlightedCells([
+          {
+            rowIndex: highlightedCells[0].rowIndex,
+            colIndex: highlightedCells[0].colIndex,
+          },
+        ]);
         setDirection(null);
+      } else {
+        let highlighted = [...highlightedCells];
+        let currRow = highlightedCells[lastIndex].rowIndex;
+        let currCol = highlightedCells[lastIndex].colIndex;
+        while (currRow !== rowIndex && currCol !== colIndex) {
+          highlighted.pop();
+          currRow++;
+          currCol--;
+        }
+        setHighlightedCells(highlighted);
       }
     }
   }
   function upLeft(rowIndex, colIndex, lastIndex) {
     if (
-      rowIndex === highlightedCells[lastIndex].rowIndex - 1 &&
-      highlightedCells[lastIndex].colIndex - 1 === colIndex &&
+      highlightedCells[lastIndex].rowIndex > rowIndex &&
+      highlightedCells[lastIndex].colIndex > colIndex &&
       !checkIfHighlighted(rowIndex, colIndex)
     ) {
-      setHighlightedCells([
-        ...highlightedCells,
-        { rowIndex: rowIndex, colIndex: colIndex },
-      ]);
+      let highlighted = [...highlightedCells];
+      let currRow = highlightedCells[lastIndex].rowIndex;
+      let currCol = highlightedCells[lastIndex].colIndex;
+      while (currRow !== rowIndex && currCol !== colIndex) {
+        currRow--;
+        currCol--;
+        highlighted.push({ rowIndex: currRow, colIndex: currCol });
+      }
+      setHighlightedCells(highlighted);
     }
     //remove
     else if (
-      rowIndex === highlightedCells[lastIndex].rowIndex + 1 &&
-      highlightedCells[lastIndex].colIndex + 1 === colIndex &&
+      highlightedCells[lastIndex].rowIndex < rowIndex &&
+      highlightedCells[lastIndex].colIndex < colIndex &&
       checkIfHighlighted(rowIndex, colIndex)
     ) {
-      let newArr = highlightedCells.slice(0, lastIndex);
-      setHighlightedCells(newArr);
-      if (newArr.length === 1) {
+      if (
+        rowIndex === highlightedCells[0].rowIndex &&
+        colIndex === highlightedCells[0].colIndex
+      ) {
+        setHighlightedCells([
+          {
+            rowIndex: highlightedCells[0].rowIndex,
+            colIndex: highlightedCells[0].colIndex,
+          },
+        ]);
         setDirection(null);
+      } else {
+        let highlighted = [...highlightedCells];
+        let currRow = highlightedCells[lastIndex].rowIndex;
+        let currCol = highlightedCells[lastIndex].colIndex;
+        while (currRow !== rowIndex && currCol !== colIndex) {
+          highlighted.pop();
+          currRow++;
+          currCol++;
+        }
+        setHighlightedCells(highlighted);
       }
     }
   }
@@ -230,90 +377,125 @@ export default function Home() {
       //check prev
       let lastIndex = highlightedCells.length - 1;
       if (!direction) {
+        //left
         if (
           highlightedCells[0].rowIndex === rowIndex &&
-          (highlightedCells[0].colIndex - 1 === colIndex ||
-            highlightedCells[0].colIndex + 1 === colIndex)
+          highlightedCells[0].colIndex > colIndex
         ) {
-          //moving left or right
-          if (highlightedCells[0].colIndex - 1 === colIndex) {
-            //moving left
-            setDirection("horizontalLeft");
-          } else if (highlightedCells[0].colIndex + 1 === colIndex) {
-            //moving right
-            setDirection("horizontalRight");
+          setDirection("horizontalLeft");
+          let highlighted = [...highlightedCells];
+          let currCol = highlightedCells[0].colIndex;
+          while (currCol !== colIndex) {
+            currCol--;
+            highlighted.push({ rowIndex: rowIndex, colIndex: currCol });
           }
-          if (rowIndex === highlightedCells[0].rowIndex) {
-            setHighlightedCells([
-              ...highlightedCells,
-              { rowIndex: rowIndex, colIndex: colIndex },
-            ]);
+          setHighlightedCells(highlighted);
+        }
+        //right
+        else if (
+          highlightedCells[0].rowIndex === rowIndex &&
+          highlightedCells[0].colIndex < colIndex
+        ) {
+          setDirection("horizontalRight");
+          let highlighted = [...highlightedCells];
+          let currCol = highlightedCells[0].colIndex;
+          while (currCol !== colIndex) {
+            currCol++;
+            highlighted.push({ rowIndex: rowIndex, colIndex: currCol });
           }
-        } else if (
+          setHighlightedCells(highlighted);
+        }
+        //up
+        else if (
           highlightedCells[0].colIndex === colIndex &&
-          (highlightedCells[0].rowIndex - 1 === rowIndex ||
-            highlightedCells[0].rowIndex + 1 === rowIndex)
+          highlightedCells[0].rowIndex > rowIndex
         ) {
-          //moving up or down
-          if (highlightedCells[0].rowIndex - 1 === rowIndex) {
-            //moving up
-            setDirection("verticalUp");
-          } else if (highlightedCells[0].rowIndex + 1 === rowIndex) {
-            //moving down
-            setDirection("verticalDown");
+          setDirection("verticalUp");
+          let highlighted = [...highlightedCells];
+          let currRow = highlightedCells[0].rowIndex;
+          while (currRow !== rowIndex) {
+            currRow--;
+            highlighted.push({ rowIndex: currRow, colIndex: colIndex });
           }
-          if (rowIndex === highlightedCells[0].rowIndex) {
-            setHighlightedCells([
-              ...highlightedCells,
-              { rowIndex: rowIndex, colIndex: colIndex },
-            ]);
-          }
-          if (colIndex === highlightedCells[0].colIndex) {
-            setHighlightedCells([
-              ...highlightedCells,
-              { rowIndex: rowIndex, colIndex: colIndex },
-            ]);
-          }
-        } else if (
-          highlightedCells[0].rowIndex + 1 === rowIndex &&
-          highlightedCells[0].colIndex + 1 === colIndex
+          setHighlightedCells(highlighted);
+        }
+        //down
+        else if (
+          highlightedCells[0].colIndex === colIndex &&
+          highlightedCells[0].rowIndex < rowIndex
         ) {
-          //downRight
+          setDirection("verticalDown");
+          let highlighted = [...highlightedCells];
+          let currRow = highlightedCells[0].rowIndex;
+          while (currRow !== rowIndex) {
+            currRow++;
+            highlighted.push({ rowIndex: currRow, colIndex: colIndex });
+          }
+          setHighlightedCells(highlighted);
+        }
+        //downRight
+        else if (
+          highlightedCells[0].rowIndex < rowIndex &&
+          highlightedCells[0].colIndex < colIndex
+        ) {
           setDirection("downRight");
-          setHighlightedCells([
-            ...highlightedCells,
-            { rowIndex: rowIndex, colIndex: colIndex },
-          ]);
-        } else if (
-          highlightedCells[0].rowIndex + 1 === rowIndex &&
-          highlightedCells[0].colIndex - 1 === colIndex
+          let highlighted = [...highlightedCells];
+          let currRow = highlightedCells[0].rowIndex;
+          let currCol = highlightedCells[0].colIndex;
+          while (currRow !== rowIndex && currCol !== colIndex) {
+            currRow++;
+            currCol++;
+            highlighted.push({ rowIndex: currRow, colIndex: currCol });
+          }
+          setHighlightedCells(highlighted);
+        }
+        //downLeft
+        else if (
+          highlightedCells[0].rowIndex < rowIndex &&
+          highlightedCells[0].colIndex > colIndex
         ) {
-          //downRight
           setDirection("downLeft");
-          setHighlightedCells([
-            ...highlightedCells,
-            { rowIndex: rowIndex, colIndex: colIndex },
-          ]);
-        } else if (
-          highlightedCells[0].rowIndex - 1 === rowIndex &&
-          highlightedCells[0].colIndex + 1 === colIndex
+          let highlighted = [...highlightedCells];
+          let currRow = highlightedCells[0].rowIndex;
+          let currCol = highlightedCells[0].colIndex;
+          while (currRow !== rowIndex && currCol !== colIndex) {
+            currRow++;
+            currCol--;
+            highlighted.push({ rowIndex: currRow, colIndex: currCol });
+          }
+          setHighlightedCells(highlighted);
+        }
+        //upRight
+        else if (
+          highlightedCells[0].rowIndex > rowIndex &&
+          highlightedCells[0].colIndex < colIndex
         ) {
-          //downRight
           setDirection("upRight");
-          setHighlightedCells([
-            ...highlightedCells,
-            { rowIndex: rowIndex, colIndex: colIndex },
-          ]);
-        } else if (
-          highlightedCells[0].rowIndex - 1 === rowIndex &&
-          highlightedCells[0].colIndex - 1 === colIndex
+          let highlighted = [...highlightedCells];
+          let currRow = highlightedCells[0].rowIndex;
+          let currCol = highlightedCells[0].colIndex;
+          while (currRow !== rowIndex && currCol !== colIndex) {
+            currRow--;
+            currCol++;
+            highlighted.push({ rowIndex: currRow, colIndex: currCol });
+          }
+          setHighlightedCells(highlighted);
+        }
+        //upLeft
+        else if (
+          highlightedCells[0].rowIndex > rowIndex &&
+          highlightedCells[0].colIndex > colIndex
         ) {
-          //downRight
           setDirection("upLeft");
-          setHighlightedCells([
-            ...highlightedCells,
-            { rowIndex: rowIndex, colIndex: colIndex },
-          ]);
+          let highlighted = [...highlightedCells];
+          let currRow = highlightedCells[0].rowIndex;
+          let currCol = highlightedCells[0].colIndex;
+          while (currRow !== rowIndex && currCol !== colIndex) {
+            currRow--;
+            currCol--;
+            highlighted.push({ rowIndex: currRow, colIndex: currCol });
+          }
+          setHighlightedCells(highlighted);
         }
       }
       //after initial
@@ -367,9 +549,12 @@ export default function Home() {
       newObj[`${next.rowIndex}-${next.colIndex}`] = 1;
     }
     //check if word exists
-    if (wordsToFind.find(w => w.word === word)) {
+    if (wordsToFind.find((w) => w.word === word)) {
       setCompletedWords(newObj);
-      setWordsToFind([...wordsToFind, {...wordsToFind.find((w) => w.word === word).complete = true}])
+      setWordsToFind([
+        ...wordsToFind,
+        { ...(wordsToFind.find((w) => w.word === word).complete = true) },
+      ]);
     }
     return word;
   };
@@ -492,7 +677,7 @@ export default function Home() {
             // console.log(`${word} at ${row}, ${col}`);
             grid[row][col] = word[i];
           }
-          wordsPlaced.push({word: word, complete: false});
+          wordsPlaced.push({ word: word, complete: false });
           placed = true;
           break;
         }
@@ -517,27 +702,30 @@ export default function Home() {
     return <div>loading</div>;
   } else {
     return (
-      <div  className="flex flex-col items-center mt-10">
-      <h1 className="text-lg font-bold">Word Search</h1>
-      <div className="flex justify-center items-center gap-10">
-        <div className="border-slate-800 border p-2">
-          {wordsToFind.map((word, index) => (
-            <div key={index}>
-              <p className={`text-lg ${word.complete && 'line-through'}`}>{word.word}</p>
-            </div>
-          ))}
+      <div className="flex flex-col items-center my-10">
+        <h1 className="text-2xl font-bold">Word Search</h1>
+        <div className="flex justify-center items-start mt-10 gap-24">
+          <div className="border-slate-800 border p-2">
+            <h2 className="text-xl font-bold underline ">Word Bank</h2>
+            {wordsToFind.map((word, index) => (
+              <div key={index}>
+                <p className={`text-lg ${word.complete && "line-through"}`}>
+                  {word.word}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="border-slate-800 border ">
+            {/* <h1>Word Search Game</h1> */}
+            <WordSearchGrid
+              isHighlighted={checkIfHighlighted}
+              onMouseEnter={handleMouseEnter}
+              listOfLetters={randLetters}
+              onLetterClick={handleLetterClick}
+              isComplete={checkIfComplete}
+            />
+          </div>
         </div>
-        <div className="border-slate-800 border my-10 p-2">
-          {/* <h1>Word Search Game</h1> */}
-          <WordSearchGrid
-            isHighlighted={checkIfHighlighted}
-            onMouseEnter={handleMouseEnter}
-            listOfLetters={randLetters}
-            onLetterClick={handleLetterClick}
-            isComplete={checkIfComplete}
-          />
-        </div>
-      </div>
       </div>
     );
   }
