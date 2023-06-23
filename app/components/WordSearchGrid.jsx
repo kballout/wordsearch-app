@@ -2,7 +2,7 @@ import React from "react";
 
 export default function WordSearchGrid({ listOfLetters, onLetterClick, onMouseEnter, isHighlighted, isComplete }) {
   return (
-    <div className="grid gridStyle w-full gap-1">
+    <div className="grid gridStyle w-full">
       {listOfLetters.map((row, rowIndex) =>
         row.map((letter, colIndex) => (
           <div

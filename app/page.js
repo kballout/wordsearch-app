@@ -31,13 +31,12 @@ export default function Home() {
     }
   };
 
-  function horizontalLeft(rowIndex, colIndex, lastIndex) {
+  function horizontalLeft(rowIndex, colIndex, lastIndex, switched = false) {
     if (
       rowIndex === highlightedCells[0].rowIndex &&
-      highlightedCells[lastIndex].colIndex > colIndex &&
-      !checkIfHighlighted(rowIndex, colIndex)
+      highlightedCells[lastIndex].colIndex > colIndex
     ) {
-      let highlighted = [...highlightedCells];
+      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currCol !== colIndex) {
         currCol--;
@@ -69,15 +68,25 @@ export default function Home() {
         setHighlightedCells(highlighted);
       }
     }
+    //switching direction to downLeft
+    else if (rowIndex === highlightedCells[0].rowIndex + (highlightedCells.length - 1)){
+      let oldCol = highlightedCells[lastIndex].colIndex
+      downLeft(highlightedCells[0].rowIndex + (highlightedCells.length - 1), oldCol, 0, true)
+      setDirection('downLeft')
+    }
+    //switching direction to upLeft
+    else if (rowIndex === highlightedCells[0].rowIndex - (highlightedCells.length - 1)){
+      let oldCol = highlightedCells[lastIndex].colIndex
+      upLeft(highlightedCells[0].rowIndex - (highlightedCells.length - 1), oldCol, 0, true)
+      setDirection('upLeft')
+    }
   }
-
-  function horizontalRight(rowIndex, colIndex, lastIndex) {
+  function horizontalRight(rowIndex, colIndex, lastIndex, switched = false) {
     if (
       rowIndex === highlightedCells[0].rowIndex &&
-      highlightedCells[lastIndex].colIndex < colIndex &&
-      !checkIfHighlighted(rowIndex, colIndex)
+      highlightedCells[lastIndex].colIndex < colIndex
     ) {
-      let highlighted = [...highlightedCells];
+      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currCol !== colIndex) {
         currCol++;
@@ -109,14 +118,25 @@ export default function Home() {
         setHighlightedCells(highlighted);
       }
     }
+    //switching direction to downRight
+    else if (rowIndex === highlightedCells[0].rowIndex + (highlightedCells.length - 1)){
+      let oldCol = highlightedCells[lastIndex].colIndex
+      downRight(highlightedCells[0].rowIndex + (highlightedCells.length - 1), oldCol, 0, true)
+      setDirection('downRight')
+    }
+    //switching direction to upRight
+    else if (rowIndex === highlightedCells[0].rowIndex - (highlightedCells.length - 1)){
+      let oldCol = highlightedCells[lastIndex].colIndex
+      upRight(highlightedCells[0].rowIndex - (highlightedCells.length - 1), oldCol, 0, true)
+      setDirection('upRight')
+    }
   }
-
-  function verticalDown(rowIndex, colIndex, lastIndex) {
+  function verticalDown(rowIndex, colIndex, lastIndex, switched = false) {
     if (
       colIndex === highlightedCells[0].colIndex &&
       highlightedCells[lastIndex].rowIndex < rowIndex
     ) {
-      let highlighted = [...highlightedCells];
+      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
       let currRow = highlightedCells[lastIndex].rowIndex;
       while (currRow !== rowIndex) {
         currRow++;
@@ -147,14 +167,25 @@ export default function Home() {
         setHighlightedCells(highlighted);
       }
     }
+    //switching direction to downRight
+    else if (colIndex === highlightedCells[0].colIndex + (highlightedCells.length - 1)){
+      let oldRow = highlightedCells[lastIndex].rowIndex
+      downRight(oldRow, highlightedCells[0].colIndex + (highlightedCells.length - 1), 0, true)
+      setDirection('downRight')
+    }
+    //switching direction to downLeft
+    else if (colIndex === highlightedCells[0].colIndex - (highlightedCells.length - 1)){
+      let oldRow = highlightedCells[lastIndex].oldIndex
+      downLeft(oldRow, highlightedCells[0].colIndex - (highlightedCells.length - 1), 0, true)
+      setDirection('downLeft')
+    }
   }
-
-  function verticalUp(rowIndex, colIndex, lastIndex) {
+  function verticalUp(rowIndex, colIndex, lastIndex, switched = false) {
     if (
       colIndex === highlightedCells[0].colIndex &&
       highlightedCells[lastIndex].rowIndex > rowIndex
     ) {
-      let highlighted = [...highlightedCells];
+      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
       let currRow = highlightedCells[lastIndex].rowIndex;
       while (currRow !== rowIndex) {
         currRow--;
@@ -185,15 +216,26 @@ export default function Home() {
         setHighlightedCells(highlighted);
       }
     }
+    //switching direction to upRight
+    else if (colIndex === highlightedCells[0].colIndex + (highlightedCells.length - 1)){
+      let oldRow = highlightedCells[lastIndex].rowIndex
+      upRight(oldRow, highlightedCells[0].colIndex + (highlightedCells.length - 1), 0, true)
+      setDirection('upRight')
+    }
+    //switching direction to upLeft
+    else if (colIndex === highlightedCells[0].colIndex - (highlightedCells.length - 1)){
+      let oldRow = highlightedCells[lastIndex].oldIndex
+      upLeft(oldRow, highlightedCells[0].colIndex - (highlightedCells.length - 1), 0, true)
+      setDirection('upLeft')
+    }
   }
-
-  function downRight(rowIndex, colIndex, lastIndex) {
+  function downRight(rowIndex, colIndex, lastIndex, switched = false) {
     if (
+      switched || (
       highlightedCells[lastIndex].rowIndex < rowIndex &&
-      highlightedCells[lastIndex].colIndex < colIndex &&
-      !checkIfHighlighted(rowIndex, colIndex)
+      highlightedCells[lastIndex].colIndex < colIndex )
     ) {
-      let highlighted = [...highlightedCells];
+      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
       let currRow = highlightedCells[lastIndex].rowIndex;
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currRow !== rowIndex && currCol !== colIndex) {
@@ -232,14 +274,26 @@ export default function Home() {
         setHighlightedCells(highlighted);
       }
     }
+    //switching direction to horizontalright
+    else if (rowIndex === highlightedCells[0].rowIndex){
+      let oldCol = highlightedCells[lastIndex].colIndex
+      horizontalRight(highlightedCells[0].rowIndex, oldCol, 0, true)
+      setDirection('horizontalRight')
+    }
+    //switching direction to verticalDown
+    else if (colIndex === highlightedCells[0].colIndex){
+      let oldRow = highlightedCells[lastIndex].rowIndex
+      verticalDown(oldRow, highlightedCells[0].colIndex, 0, true)
+      setDirection('verticalDown')
+    }
   }
-  function downLeft(rowIndex, colIndex, lastIndex) {
+  function downLeft(rowIndex, colIndex, lastIndex, switched = false) {
     if (
+      switched || (
       highlightedCells[lastIndex].rowIndex < rowIndex &&
-      highlightedCells[lastIndex].colIndex > colIndex &&
-      !checkIfHighlighted(rowIndex, colIndex)
+      highlightedCells[lastIndex].colIndex > colIndex)
     ) {
-      let highlighted = [...highlightedCells];
+      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
       let currRow = highlightedCells[lastIndex].rowIndex;
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currRow !== rowIndex && currCol !== colIndex) {
@@ -278,14 +332,26 @@ export default function Home() {
         setHighlightedCells(highlighted);
       }
     }
+    //switching direction to horizontalleft
+    else if (rowIndex === highlightedCells[0].rowIndex){
+      let oldCol = highlightedCells[lastIndex].colIndex
+      horizontalLeft(highlightedCells[0].rowIndex, oldCol, 0, true)
+      setDirection('horizontalLeft')
+    }
+    //switching direction to verticalDown
+    else if (colIndex === highlightedCells[0].colIndex){
+      let oldRow = highlightedCells[lastIndex].rowIndex
+      verticalDown(oldRow, highlightedCells[0].colIndex, 0, true)
+      setDirection('verticalDown')
+    }
   }
-  function upRight(rowIndex, colIndex, lastIndex) {
+  function upRight(rowIndex, colIndex, lastIndex, switched = false) {
     if (
+      switched || (
       highlightedCells[lastIndex].rowIndex > rowIndex &&
-      highlightedCells[lastIndex].colIndex < colIndex &&
-      !checkIfHighlighted(rowIndex, colIndex)
+      highlightedCells[lastIndex].colIndex < colIndex)
     ) {
-      let highlighted = [...highlightedCells];
+      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
       let currRow = highlightedCells[lastIndex].rowIndex;
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currRow !== rowIndex && currCol !== colIndex) {
@@ -324,14 +390,26 @@ export default function Home() {
         setHighlightedCells(highlighted);
       }
     }
+    //switching direction to horizontalright
+    else if (rowIndex === highlightedCells[0].rowIndex){
+      let oldCol = highlightedCells[lastIndex].colIndex
+      horizontalRight(highlightedCells[0].rowIndex, oldCol, 0, true)
+      setDirection('horizontalRight')
+    }
+    //switching direction to verticalUp
+    else if (colIndex === highlightedCells[0].colIndex){
+      let oldRow = highlightedCells[lastIndex].rowIndex
+      verticalUp(oldRow, highlightedCells[0].colIndex, 0, true)
+      setDirection('verticalUp')
+    }
   }
-  function upLeft(rowIndex, colIndex, lastIndex) {
+  function upLeft(rowIndex, colIndex, lastIndex, switched = false) {
     if (
+      switched || (
       highlightedCells[lastIndex].rowIndex > rowIndex &&
-      highlightedCells[lastIndex].colIndex > colIndex &&
-      !checkIfHighlighted(rowIndex, colIndex)
+      highlightedCells[lastIndex].colIndex > colIndex)
     ) {
-      let highlighted = [...highlightedCells];
+      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
       let currRow = highlightedCells[lastIndex].rowIndex;
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currRow !== rowIndex && currCol !== colIndex) {
@@ -369,6 +447,18 @@ export default function Home() {
         }
         setHighlightedCells(highlighted);
       }
+    }
+    //switching direction to horizontalleft
+    else if (rowIndex === highlightedCells[0].rowIndex){
+      let oldCol = highlightedCells[lastIndex].colIndex
+      horizontalLeft(highlightedCells[0].rowIndex, oldCol, 0, true)
+      setDirection('horizontalLeft')
+    }
+    //switching direction to verticalUp
+    else if (colIndex === highlightedCells[0].colIndex){
+      let oldRow = highlightedCells[lastIndex].rowIndex
+      verticalUp(oldRow, highlightedCells[0].colIndex, 0, true)
+      setDirection('verticalUp')
     }
   }
 
