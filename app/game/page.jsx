@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import WordSearchGrid from "./components/WordSearchGrid";
+import WordSearchGrid from "../components/WordSearchGrid";
 
-export default function Home() {
+export default function Game() {
   const [randLetters, setRandLetters] = useState();
   const [loading, setLoading] = useState(true);
 
