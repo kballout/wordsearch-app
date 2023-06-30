@@ -9,3 +9,37 @@
   /* 15 */
 }
 
+/* Hide the scrollbar */
+::-webkit-scrollbar {
+  width: 0.8rem;
+}
+
+/* Style the thumb */
+::-webkit-scrollbar-thumb {
+  background-color: #5d7eb0;
+  border-radius: 0.4rem;
+}
+
+/* Style the track */
+::-webkit-scrollbar-track {
+  background-color: #f7fafc;
+  border-radius: 0.4rem;
+}
+
+
+.basicInput {
+  @apply p-2 outline-none focus:outline-blue-500 rounded-md
+}
+
+.basicBtn {
+  @apply p-2 outline-none shadow-md rounded-md bg-slate-800 hover:bg-slate-700 text-white
+}
+
+.basicContainer {
+  @apply p-3 rounded-md bg-blue-200
+}
+
+.submitBtn {
+  @apply px-4 py-2 bg-blue-500 text-white rounded-r-md cursor-pointer hover:bg-blue-600 focus:outline-none
+}
+
