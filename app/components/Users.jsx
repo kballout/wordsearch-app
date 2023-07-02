@@ -11,7 +11,7 @@ const Users = ({ users }) => {
       >
         {users && users.map((user, index) => (
           <div className="border-b border-slate-800 py-2" key={index}>
-            <p>{user}</p>
+            <p>{user.username}</p>
           </div>
         ))}
       </div>

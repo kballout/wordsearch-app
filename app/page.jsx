@@ -1,5 +1,6 @@
 "use client";
 import useSessionStore from "@/utils/store";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useRef, useEffect } from "react";
 
@@ -15,13 +16,20 @@ export default function Home() {
     router.push("/main");
   }
   return (
-    <div>
-      <h1>Welcome</h1>
-      <p>Enter a username to start</p>
-      <form onSubmit={(e) => login(e)}>
-        <input ref={username} type="text" required />
-        <input type="submit" />
-      </form>
+    <div className="flex flex-col items-center">
+      <header className="mt-16">
+        <div>
+          <Link href={"/"} className="text-3xl font-bold">Word Search Online</Link>
+        </div>
+      </header>
+      <main className="mt-10 flex flex-col items-center">
+        <h1 className="text-2xl mb-10">Welcome</h1>
+        <p>Enter a username to start</p>
+        <form onSubmit={(e) => login(e)}>
+          <input ref={username} type="text" required />
+          <input type="submit" />
+        </form>
+      </main>
     </div>
   );
 }

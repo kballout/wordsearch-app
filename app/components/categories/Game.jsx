@@ -1,8 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import WordSearchGrid from "../components/WordSearchGrid";
+import WordSearchGrid from "../WordSearchGrid";
+import useSessionStore from "@/utils/store";
 
-export default function Game() {
+export default function Game({players, socket}) {
+  console.log(players);
+  const {isHost} = useSessionStore()
   const [randLetters, setRandLetters] = useState();
   const [loading, setLoading] = useState(true);
 
@@ -697,10 +700,21 @@ export default function Game() {
       "DOLPHIN",
       "PANTHER",
     ];
-
-    setRandLetters(placeWordsInGrid(listOfWords, 20, 15));
-    setLoading(false);
+    if(isHost){
+      const {grid, wordsPlaced} = placeWordsInGrid(listOfWords, 20, 15)
+      setRandLetters(grid);
+      socket.emit('set-board', {grid: grid, wordsPlaced: wordsPlaced})
+      setLoading(false);
+    }
   }, []);
+
+  socket.on('boardSet', (data) => {
+    if(!isHost){
+      setWordsToFind(data.wordsPlaced)
+      setRandLetters(data.grid)
+      setLoading(false)
+    }
+  })
 
   // Function to check if a starting position is valid for a word
   function isValidStartingPosition(startRow, startCol, word, direction, grid) {
@@ -785,7 +799,7 @@ export default function Game() {
       }
     }
 
-    return grid;
+    return {grid: grid, wordsPlaced: wordsPlaced};
   }
 
   if (loading) {
