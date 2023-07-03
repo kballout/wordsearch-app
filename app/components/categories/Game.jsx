@@ -2,10 +2,12 @@
 import { useEffect, useRef, useState } from "react";
 import WordSearchGrid from "../WordSearchGrid";
 import useSessionStore from "@/utils/store";
+import ChatBox from "../ChatBox";
 
-export default function Game({players, socket}) {
-  console.log(players);
-  const {isHost} = useSessionStore()
+export default function Game({ users, socket }) {
+  const { isHost, changeColor, color, username, currentRoom } = useSessionStore();
+  const [players, setPlayers] = useState(users);
+  const [messages, setMessages] = useState([])
   const [randLetters, setRandLetters] = useState();
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +41,14 @@ export default function Game({players, socket}) {
       rowIndex === highlightedCells[0].rowIndex &&
       highlightedCells[lastIndex].colIndex > colIndex
     ) {
-      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
+      let highlighted = !switched
+        ? [...highlightedCells]
+        : [
+            {
+              rowIndex: highlightedCells[0].rowIndex,
+              colIndex: highlightedCells[0].colIndex,
+            },
+          ];
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currCol !== colIndex) {
         currCol--;
@@ -72,16 +81,32 @@ export default function Game({players, socket}) {
       }
     }
     //switching direction to downLeft
-    else if (rowIndex === highlightedCells[0].rowIndex + (highlightedCells.length - 1)){
-      let oldCol = highlightedCells[lastIndex].colIndex
-      downLeft(highlightedCells[0].rowIndex + (highlightedCells.length - 1), oldCol, 0, true)
-      setDirection('downLeft')
+    else if (
+      rowIndex ===
+      highlightedCells[0].rowIndex + (highlightedCells.length - 1)
+    ) {
+      let oldCol = highlightedCells[lastIndex].colIndex;
+      downLeft(
+        highlightedCells[0].rowIndex + (highlightedCells.length - 1),
+        oldCol,
+        0,
+        true
+      );
+      setDirection("downLeft");
     }
     //switching direction to upLeft
-    else if (rowIndex === highlightedCells[0].rowIndex - (highlightedCells.length - 1)){
-      let oldCol = highlightedCells[lastIndex].colIndex
-      upLeft(highlightedCells[0].rowIndex - (highlightedCells.length - 1), oldCol, 0, true)
-      setDirection('upLeft')
+    else if (
+      rowIndex ===
+      highlightedCells[0].rowIndex - (highlightedCells.length - 1)
+    ) {
+      let oldCol = highlightedCells[lastIndex].colIndex;
+      upLeft(
+        highlightedCells[0].rowIndex - (highlightedCells.length - 1),
+        oldCol,
+        0,
+        true
+      );
+      setDirection("upLeft");
     }
   }
   function horizontalRight(rowIndex, colIndex, lastIndex, switched = false) {
@@ -89,7 +114,14 @@ export default function Game({players, socket}) {
       rowIndex === highlightedCells[0].rowIndex &&
       highlightedCells[lastIndex].colIndex < colIndex
     ) {
-      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
+      let highlighted = !switched
+        ? [...highlightedCells]
+        : [
+            {
+              rowIndex: highlightedCells[0].rowIndex,
+              colIndex: highlightedCells[0].colIndex,
+            },
+          ];
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currCol !== colIndex) {
         currCol++;
@@ -122,16 +154,32 @@ export default function Game({players, socket}) {
       }
     }
     //switching direction to downRight
-    else if (rowIndex === highlightedCells[0].rowIndex + (highlightedCells.length - 1)){
-      let oldCol = highlightedCells[lastIndex].colIndex
-      downRight(highlightedCells[0].rowIndex + (highlightedCells.length - 1), oldCol, 0, true)
-      setDirection('downRight')
+    else if (
+      rowIndex ===
+      highlightedCells[0].rowIndex + (highlightedCells.length - 1)
+    ) {
+      let oldCol = highlightedCells[lastIndex].colIndex;
+      downRight(
+        highlightedCells[0].rowIndex + (highlightedCells.length - 1),
+        oldCol,
+        0,
+        true
+      );
+      setDirection("downRight");
     }
     //switching direction to upRight
-    else if (rowIndex === highlightedCells[0].rowIndex - (highlightedCells.length - 1)){
-      let oldCol = highlightedCells[lastIndex].colIndex
-      upRight(highlightedCells[0].rowIndex - (highlightedCells.length - 1), oldCol, 0, true)
-      setDirection('upRight')
+    else if (
+      rowIndex ===
+      highlightedCells[0].rowIndex - (highlightedCells.length - 1)
+    ) {
+      let oldCol = highlightedCells[lastIndex].colIndex;
+      upRight(
+        highlightedCells[0].rowIndex - (highlightedCells.length - 1),
+        oldCol,
+        0,
+        true
+      );
+      setDirection("upRight");
     }
   }
   function verticalDown(rowIndex, colIndex, lastIndex, switched = false) {
@@ -139,7 +187,14 @@ export default function Game({players, socket}) {
       colIndex === highlightedCells[0].colIndex &&
       highlightedCells[lastIndex].rowIndex < rowIndex
     ) {
-      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
+      let highlighted = !switched
+        ? [...highlightedCells]
+        : [
+            {
+              rowIndex: highlightedCells[0].rowIndex,
+              colIndex: highlightedCells[0].colIndex,
+            },
+          ];
       let currRow = highlightedCells[lastIndex].rowIndex;
       while (currRow !== rowIndex) {
         currRow++;
@@ -171,16 +226,32 @@ export default function Game({players, socket}) {
       }
     }
     //switching direction to downRight
-    else if (colIndex === highlightedCells[0].colIndex + (highlightedCells.length - 1)){
-      let oldRow = highlightedCells[lastIndex].rowIndex
-      downRight(oldRow, highlightedCells[0].colIndex + (highlightedCells.length - 1), 0, true)
-      setDirection('downRight')
+    else if (
+      colIndex ===
+      highlightedCells[0].colIndex + (highlightedCells.length - 1)
+    ) {
+      let oldRow = highlightedCells[lastIndex].rowIndex;
+      downRight(
+        oldRow,
+        highlightedCells[0].colIndex + (highlightedCells.length - 1),
+        0,
+        true
+      );
+      setDirection("downRight");
     }
     //switching direction to downLeft
-    else if (colIndex === highlightedCells[0].colIndex - (highlightedCells.length - 1)){
-      let oldRow = highlightedCells[lastIndex].oldIndex
-      downLeft(oldRow, highlightedCells[0].colIndex - (highlightedCells.length - 1), 0, true)
-      setDirection('downLeft')
+    else if (
+      colIndex ===
+      highlightedCells[0].colIndex - (highlightedCells.length - 1)
+    ) {
+      let oldRow = highlightedCells[lastIndex].oldIndex;
+      downLeft(
+        oldRow,
+        highlightedCells[0].colIndex - (highlightedCells.length - 1),
+        0,
+        true
+      );
+      setDirection("downLeft");
     }
   }
   function verticalUp(rowIndex, colIndex, lastIndex, switched = false) {
@@ -188,7 +259,14 @@ export default function Game({players, socket}) {
       colIndex === highlightedCells[0].colIndex &&
       highlightedCells[lastIndex].rowIndex > rowIndex
     ) {
-      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
+      let highlighted = !switched
+        ? [...highlightedCells]
+        : [
+            {
+              rowIndex: highlightedCells[0].rowIndex,
+              colIndex: highlightedCells[0].colIndex,
+            },
+          ];
       let currRow = highlightedCells[lastIndex].rowIndex;
       while (currRow !== rowIndex) {
         currRow--;
@@ -220,25 +298,48 @@ export default function Game({players, socket}) {
       }
     }
     //switching direction to upRight
-    else if (colIndex === highlightedCells[0].colIndex + (highlightedCells.length - 1)){
-      let oldRow = highlightedCells[lastIndex].rowIndex
-      upRight(oldRow, highlightedCells[0].colIndex + (highlightedCells.length - 1), 0, true)
-      setDirection('upRight')
+    else if (
+      colIndex ===
+      highlightedCells[0].colIndex + (highlightedCells.length - 1)
+    ) {
+      let oldRow = highlightedCells[lastIndex].rowIndex;
+      upRight(
+        oldRow,
+        highlightedCells[0].colIndex + (highlightedCells.length - 1),
+        0,
+        true
+      );
+      setDirection("upRight");
     }
     //switching direction to upLeft
-    else if (colIndex === highlightedCells[0].colIndex - (highlightedCells.length - 1)){
-      let oldRow = highlightedCells[lastIndex].oldIndex
-      upLeft(oldRow, highlightedCells[0].colIndex - (highlightedCells.length - 1), 0, true)
-      setDirection('upLeft')
+    else if (
+      colIndex ===
+      highlightedCells[0].colIndex - (highlightedCells.length - 1)
+    ) {
+      let oldRow = highlightedCells[lastIndex].oldIndex;
+      upLeft(
+        oldRow,
+        highlightedCells[0].colIndex - (highlightedCells.length - 1),
+        0,
+        true
+      );
+      setDirection("upLeft");
     }
   }
   function downRight(rowIndex, colIndex, lastIndex, switched = false) {
     if (
-      switched || (
-      highlightedCells[lastIndex].rowIndex < rowIndex &&
-      highlightedCells[lastIndex].colIndex < colIndex )
+      switched ||
+      (highlightedCells[lastIndex].rowIndex < rowIndex &&
+        highlightedCells[lastIndex].colIndex < colIndex)
     ) {
-      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
+      let highlighted = !switched
+        ? [...highlightedCells]
+        : [
+            {
+              rowIndex: highlightedCells[0].rowIndex,
+              colIndex: highlightedCells[0].colIndex,
+            },
+          ];
       let currRow = highlightedCells[lastIndex].rowIndex;
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currRow !== rowIndex && currCol !== colIndex) {
@@ -278,25 +379,32 @@ export default function Game({players, socket}) {
       }
     }
     //switching direction to horizontalright
-    else if (rowIndex === highlightedCells[0].rowIndex){
-      let oldCol = highlightedCells[lastIndex].colIndex
-      horizontalRight(highlightedCells[0].rowIndex, oldCol, 0, true)
-      setDirection('horizontalRight')
+    else if (rowIndex === highlightedCells[0].rowIndex) {
+      let oldCol = highlightedCells[lastIndex].colIndex;
+      horizontalRight(highlightedCells[0].rowIndex, oldCol, 0, true);
+      setDirection("horizontalRight");
     }
     //switching direction to verticalDown
-    else if (colIndex === highlightedCells[0].colIndex){
-      let oldRow = highlightedCells[lastIndex].rowIndex
-      verticalDown(oldRow, highlightedCells[0].colIndex, 0, true)
-      setDirection('verticalDown')
+    else if (colIndex === highlightedCells[0].colIndex) {
+      let oldRow = highlightedCells[lastIndex].rowIndex;
+      verticalDown(oldRow, highlightedCells[0].colIndex, 0, true);
+      setDirection("verticalDown");
     }
   }
   function downLeft(rowIndex, colIndex, lastIndex, switched = false) {
     if (
-      switched || (
-      highlightedCells[lastIndex].rowIndex < rowIndex &&
-      highlightedCells[lastIndex].colIndex > colIndex)
+      switched ||
+      (highlightedCells[lastIndex].rowIndex < rowIndex &&
+        highlightedCells[lastIndex].colIndex > colIndex)
     ) {
-      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
+      let highlighted = !switched
+        ? [...highlightedCells]
+        : [
+            {
+              rowIndex: highlightedCells[0].rowIndex,
+              colIndex: highlightedCells[0].colIndex,
+            },
+          ];
       let currRow = highlightedCells[lastIndex].rowIndex;
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currRow !== rowIndex && currCol !== colIndex) {
@@ -336,25 +444,32 @@ export default function Game({players, socket}) {
       }
     }
     //switching direction to horizontalleft
-    else if (rowIndex === highlightedCells[0].rowIndex){
-      let oldCol = highlightedCells[lastIndex].colIndex
-      horizontalLeft(highlightedCells[0].rowIndex, oldCol, 0, true)
-      setDirection('horizontalLeft')
+    else if (rowIndex === highlightedCells[0].rowIndex) {
+      let oldCol = highlightedCells[lastIndex].colIndex;
+      horizontalLeft(highlightedCells[0].rowIndex, oldCol, 0, true);
+      setDirection("horizontalLeft");
     }
     //switching direction to verticalDown
-    else if (colIndex === highlightedCells[0].colIndex){
-      let oldRow = highlightedCells[lastIndex].rowIndex
-      verticalDown(oldRow, highlightedCells[0].colIndex, 0, true)
-      setDirection('verticalDown')
+    else if (colIndex === highlightedCells[0].colIndex) {
+      let oldRow = highlightedCells[lastIndex].rowIndex;
+      verticalDown(oldRow, highlightedCells[0].colIndex, 0, true);
+      setDirection("verticalDown");
     }
   }
   function upRight(rowIndex, colIndex, lastIndex, switched = false) {
     if (
-      switched || (
-      highlightedCells[lastIndex].rowIndex > rowIndex &&
-      highlightedCells[lastIndex].colIndex < colIndex)
+      switched ||
+      (highlightedCells[lastIndex].rowIndex > rowIndex &&
+        highlightedCells[lastIndex].colIndex < colIndex)
     ) {
-      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
+      let highlighted = !switched
+        ? [...highlightedCells]
+        : [
+            {
+              rowIndex: highlightedCells[0].rowIndex,
+              colIndex: highlightedCells[0].colIndex,
+            },
+          ];
       let currRow = highlightedCells[lastIndex].rowIndex;
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currRow !== rowIndex && currCol !== colIndex) {
@@ -394,25 +509,32 @@ export default function Game({players, socket}) {
       }
     }
     //switching direction to horizontalright
-    else if (rowIndex === highlightedCells[0].rowIndex){
-      let oldCol = highlightedCells[lastIndex].colIndex
-      horizontalRight(highlightedCells[0].rowIndex, oldCol, 0, true)
-      setDirection('horizontalRight')
+    else if (rowIndex === highlightedCells[0].rowIndex) {
+      let oldCol = highlightedCells[lastIndex].colIndex;
+      horizontalRight(highlightedCells[0].rowIndex, oldCol, 0, true);
+      setDirection("horizontalRight");
     }
     //switching direction to verticalUp
-    else if (colIndex === highlightedCells[0].colIndex){
-      let oldRow = highlightedCells[lastIndex].rowIndex
-      verticalUp(oldRow, highlightedCells[0].colIndex, 0, true)
-      setDirection('verticalUp')
+    else if (colIndex === highlightedCells[0].colIndex) {
+      let oldRow = highlightedCells[lastIndex].rowIndex;
+      verticalUp(oldRow, highlightedCells[0].colIndex, 0, true);
+      setDirection("verticalUp");
     }
   }
   function upLeft(rowIndex, colIndex, lastIndex, switched = false) {
     if (
-      switched || (
-      highlightedCells[lastIndex].rowIndex > rowIndex &&
-      highlightedCells[lastIndex].colIndex > colIndex)
+      switched ||
+      (highlightedCells[lastIndex].rowIndex > rowIndex &&
+        highlightedCells[lastIndex].colIndex > colIndex)
     ) {
-      let highlighted = !switched ? [...highlightedCells] : [{rowIndex: highlightedCells[0].rowIndex, colIndex: highlightedCells[0].colIndex}]
+      let highlighted = !switched
+        ? [...highlightedCells]
+        : [
+            {
+              rowIndex: highlightedCells[0].rowIndex,
+              colIndex: highlightedCells[0].colIndex,
+            },
+          ];
       let currRow = highlightedCells[lastIndex].rowIndex;
       let currCol = highlightedCells[lastIndex].colIndex;
       while (currRow !== rowIndex && currCol !== colIndex) {
@@ -452,16 +574,16 @@ export default function Game({players, socket}) {
       }
     }
     //switching direction to horizontalleft
-    else if (rowIndex === highlightedCells[0].rowIndex){
-      let oldCol = highlightedCells[lastIndex].colIndex
-      horizontalLeft(highlightedCells[0].rowIndex, oldCol, 0, true)
-      setDirection('horizontalLeft')
+    else if (rowIndex === highlightedCells[0].rowIndex) {
+      let oldCol = highlightedCells[lastIndex].colIndex;
+      horizontalLeft(highlightedCells[0].rowIndex, oldCol, 0, true);
+      setDirection("horizontalLeft");
     }
     //switching direction to verticalUp
-    else if (colIndex === highlightedCells[0].colIndex){
-      let oldRow = highlightedCells[lastIndex].rowIndex
-      verticalUp(oldRow, highlightedCells[0].colIndex, 0, true)
-      setDirection('verticalUp')
+    else if (colIndex === highlightedCells[0].colIndex) {
+      let oldRow = highlightedCells[lastIndex].rowIndex;
+      verticalUp(oldRow, highlightedCells[0].colIndex, 0, true);
+      setDirection("verticalUp");
     }
   }
 
@@ -629,9 +751,9 @@ export default function Game({players, socket}) {
 
   const checkIfComplete = (row, col) => {
     if (completedWords[`${row}-${col}`]) {
-      return true;
+      return (completedWords[`${row}-${col}`]);
     }
-    return false;
+    return "hover:bg-slate-300";
   };
 
   const getWord = () => {
@@ -639,18 +761,45 @@ export default function Game({players, socket}) {
     let newObj = { ...completedWords };
     for (const next of highlightedCells) {
       word += randLetters[next.rowIndex][next.colIndex];
-      newObj[`${next.rowIndex}-${next.colIndex}`] = 1;
+      newObj[`${next.rowIndex}-${next.colIndex}`] = color;
     }
+    console.log(newObj);
     //check if word exists
     if (wordsToFind.find((w) => w.word === word)) {
       setCompletedWords(newObj);
-      setWordsToFind([
+      let newWordsToFind = [
         ...wordsToFind,
         { ...(wordsToFind.find((w) => w.word === word).complete = true) },
-      ]);
+      ]
+      setWordsToFind(newWordsToFind);
+      //send to sockets
+      socket.emit('word-complete', {wordsToFind: newWordsToFind, completedWords: newObj, currentRoom: currentRoom})
     }
+    
     return word;
   };
+
+  function setPlayerColors() {
+    //set player colors
+    let availableColors = [
+      "bg-red-500",
+      "bg-green-500",
+      "bg-yellow-500",
+      "bg-purple-500",
+      "bg-orange-500",
+    ]
+    let listOfPlayers = [];
+    let nextColor = 0
+    for (const next of users) {
+      listOfPlayers.push({
+        username: next.username,
+        socketId: next.socketId,
+        color: availableColors[nextColor]
+      })
+      nextColor++
+    }
+    return listOfPlayers
+  }
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -700,21 +849,58 @@ export default function Game({players, socket}) {
       "DOLPHIN",
       "PANTHER",
     ];
-    if(isHost){
-      const {grid, wordsPlaced} = placeWordsInGrid(listOfWords, 20, 15)
+    if (isHost) {
+      const { grid, wordsPlaced } = placeWordsInGrid(listOfWords, 20, 15);
       setRandLetters(grid);
-      socket.emit('set-board', {grid: grid, wordsPlaced: wordsPlaced})
+      let listOfPlayers = setPlayerColors()
+      setPlayers(listOfPlayers)
+      changeColor(listOfPlayers.find((user) => user.socketId === socket.id).color)
+      socket.emit("set-board", { grid: grid, wordsPlaced: wordsPlaced, listOfPlayers: listOfPlayers });
       setLoading(false);
     }
   }, []);
 
-  socket.on('boardSet', (data) => {
-    if(!isHost){
-      setWordsToFind(data.wordsPlaced)
-      setRandLetters(data.grid)
-      setLoading(false)
-    }
-  })
+  //socket listeners
+  useEffect(() => {
+    socket.on("boardSet", (data) => {
+      if (!isHost) {
+        setWordsToFind(data.wordsPlaced);
+        setRandLetters(data.grid);
+        setPlayers(data.listOfPlayers)
+        changeColor(data.listOfPlayers.find((user) => user.socketId === socket.id).color)
+        setLoading(false);
+      }
+    });
+  
+    socket.on('completeWord', (data) => {
+      setWordsToFind(data.wordsToFind)
+      setCompletedWords(data.completedWords)
+    })
+  
+    socket.on("receive-message", (data) => {
+      console.log(data);
+      if (data.author !== username) {
+        const newMessage = {
+          author: data.author,
+          message: data.message,
+          color: data.color || 'bg-white'
+        };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      } else {
+        const newMessage = {
+          author: "You",
+          message: data.message,
+          color: data.color || 'bg-white'
+        };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      }
+    });
+  },[changeColor, isHost, socket, username])
+
+
+  const sendMessage = (newMessage) => {
+    socket.emit("send-message", newMessage);
+  };
 
   // Function to check if a starting position is valid for a word
   function isValidStartingPosition(startRow, startCol, word, direction, grid) {
@@ -799,7 +985,7 @@ export default function Game({players, socket}) {
       }
     }
 
-    return {grid: grid, wordsPlaced: wordsPlaced};
+    return { grid: grid, wordsPlaced: wordsPlaced };
   }
 
   if (loading) {
@@ -829,6 +1015,7 @@ export default function Game({players, socket}) {
               isComplete={checkIfComplete}
             />
           </div>
+          <ChatBox messages={messages} sendMessage={sendMessage} color={color} />
         </div>
       </div>
     );

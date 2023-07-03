@@ -17,14 +17,6 @@ export default function Lobby({
   const [users, setUsers] = useState();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const [availableColors, setAvailableColors] = useState([
-    "#eef522",
-    "#22f526",
-    "#d522f5",
-    "#f5227a",
-    "#2ee0ed",
-  ]);
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -63,14 +55,10 @@ export default function Lobby({
         {
           username: username,
           socketId: socket.current.id,
-          socket: socket,
         },
       ]);
     } else {
       console.log("joining room");
-      console.log(roomId);
-      console.log(username);
-      console.log(socket.current.id);
       socket.current.emit("join-room", {
         id: roomId,
         username: username,

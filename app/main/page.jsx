@@ -75,7 +75,7 @@ export default function Main() {
         {choice === "lobby" && (
           <Lobby onReload={onReload} startGame={startGame} roomId={roomId} socket={socket} />
         )}
-        {choice === "game" && <Game players={players} socket={socket.current} />}
+        {choice === "game" && <Game users={players} socket={socket.current} />}
       </main>
     </div>
   );

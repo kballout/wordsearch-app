@@ -3,7 +3,7 @@ import useSessionStore from "@/utils/store";
 import { useState, useRef, useEffect } from "react";
 import { io } from "socket.io-client";
 
-const ChatBox = ({messages, sendMessage}) => {
+const ChatBox = ({messages, sendMessage, color}) => {
   const [inputMessage, setInputMessage] = useState("");
   const messagesContainerRef = useRef(null);
 
@@ -23,6 +23,7 @@ const ChatBox = ({messages, sendMessage}) => {
         author: username,
         message: inputMessage.trim(),
         currentRoom: currentRoom,
+        color: color || "bg-white"
       };
       sendMessage(newMessage)
       setInputMessage("");
@@ -46,7 +47,7 @@ const ChatBox = ({messages, sendMessage}) => {
         {messages.map((message, index) => (
           <div
             key={index}
-            className="flex flex-col mb-2 p-2 bg-white rounded-md"
+            className={`flex flex-col mb-2 p-2 rounded-md ${message.color}`}
           >
             <p className="text-gray-800 font-bold">{message.author}</p>
             <p className="text-gray-700">{message.message}</p>

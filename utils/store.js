@@ -6,10 +6,12 @@ const useSessionStore = create((set) => ({
   username: null,
   currentRoom: null,
   isHost: false,
+  color: "",
   changeSocketId: (id) => set({socketId: id}),
   changeUsername: (name) => set({username: name}),
   changeRoom: (newRoom) => set({currentRoom: newRoom}),
-  changeIsHost: (value) => set({isHost: value})
+  changeIsHost: (value) => set({isHost: value}),
+  changeColor: (val) => set({color: val})
 }))
 
 // Load initial state from the cookie if it exists

@@ -79,6 +79,10 @@ export default function SocketHandler(req, res) {
                 io.in(data.currentRoom).emit('receive-message', data)
             })
 
+            socket.on('word-complete', (data) => {
+                io.in(data.currentRoom).emit('completeWord', data)
+            })
+
             socket.on('disconnect', async () => {
                 if (usersMap.has(socket.id)) {
                     //host
