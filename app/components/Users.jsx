@@ -1,6 +1,6 @@
 import React from "react";
 
-const Users = ({ users }) => {
+const Users = ({ users, leaderBoard = false }) => {
   return (
     <div className="border-2 bg-orange-200 shadow-md border-slate-800 rounded p-4">
       <h2 className="text-xl font-bold">Players</h2>
@@ -11,7 +11,7 @@ const Users = ({ users }) => {
       >
         {users && users.map((user, index) => (
           <div className="border-b border-slate-800 py-2" key={index}>
-            <p>{user.username}</p>
+            <p>{user.username} {leaderBoard ? user.score || "0" : ""}</p>
           </div>
         ))}
       </div>

@@ -3,17 +3,19 @@ import { useEffect, useRef, useState } from "react";
 import WordSearchGrid from "../WordSearchGrid";
 import useSessionStore from "@/utils/store";
 import ChatBox from "../ChatBox";
+import Users from "../Users";
 
-export default function Game({ users, socket }) {
-  const { isHost, changeColor, color, username, currentRoom } = useSessionStore();
+export default function Game({ users, socket, endGame }) {
+  const { isHost, changeColor, color, username, currentRoom } =
+    useSessionStore();
   const [players, setPlayers] = useState(users);
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState([]);
   const [randLetters, setRandLetters] = useState();
   const [loading, setLoading] = useState(true);
 
   const [isHighlighting, setIsHighlighting] = useState(false);
   const [highlightedCells, setHighlightedCells] = useState([]);
-  const [completedWords, setCompletedWords] = useState({});
+  const [completedLetters, setCompletedLetters] = useState({});
   const [wordsToFind, setWordsToFind] = useState([]);
   const [startRowIndex, setStartRowIndex] = useState(null);
   const [startColIndex, setStartColIndex] = useState(null);
@@ -750,55 +752,65 @@ export default function Game({ users, socket }) {
   };
 
   const checkIfComplete = (row, col) => {
-    if (completedWords[`${row}-${col}`]) {
-      return (completedWords[`${row}-${col}`]);
+    if (completedLetters[`${row}-${col}`]) {
+      return completedLetters[`${row}-${col}`];
     }
     return "hover:bg-slate-300";
   };
 
   const getWord = () => {
     let word = "";
-    let newObj = { ...completedWords };
+    let newObj = { ...completedLetters };
     for (const next of highlightedCells) {
       word += randLetters[next.rowIndex][next.colIndex];
       newObj[`${next.rowIndex}-${next.colIndex}`] = color;
     }
-    console.log(newObj);
     //check if word exists
     if (wordsToFind.find((w) => w.word === word)) {
-      setCompletedWords(newObj);
-      let newWordsToFind = [
-        ...wordsToFind,
-        { ...(wordsToFind.find((w) => w.word === word).complete = true) },
-      ]
-      setWordsToFind(newWordsToFind);
+      let newWordsToFind = wordsToFind.map((w) => w.word === word ? {...w, complete: true} : w)
+      let newScore = players.find((player) => player.socketId === socket.id).score
+      newScore++
+      const updatedPlayers = players.map((player) =>
+        player.socketId === socket.id ? { ...player, score: newScore } : player
+      );
       //send to sockets
-      socket.emit('word-complete', {wordsToFind: newWordsToFind, completedWords: newObj, currentRoom: currentRoom})
+      socket.emit("word-complete", {
+        wordsToFind: newWordsToFind,
+        completedWords: newObj,
+        currentRoom: currentRoom,
+        updatedPlayers: updatedPlayers
+      });
+      //check if game over
+      console.log(wordsToFind);
+      if(newWordsToFind.filter((w) => w.complete !== true).length === 0){
+        socket.emit('gameOver', {players: players, currentRoom: currentRoom})
+      }
     }
-    
+
     return word;
   };
 
   function setPlayerColors() {
     //set player colors
     let availableColors = [
-      "bg-red-500",
-      "bg-green-500",
-      "bg-yellow-500",
-      "bg-purple-500",
-      "bg-orange-500",
-    ]
+      "bg-red-300",
+      "bg-green-300",
+      "bg-yellow-300",
+      "bg-purple-300",
+      "bg-orange-300",
+    ];
     let listOfPlayers = [];
-    let nextColor = 0
+    let nextColor = 0;
     for (const next of users) {
       listOfPlayers.push({
         username: next.username,
         socketId: next.socketId,
-        color: availableColors[nextColor]
-      })
-      nextColor++
+        color: availableColors[nextColor],
+        score: 0,
+      });
+      nextColor++;
     }
-    return listOfPlayers
+    return listOfPlayers;
   }
 
   useEffect(() => {
@@ -852,10 +864,16 @@ export default function Game({ users, socket }) {
     if (isHost) {
       const { grid, wordsPlaced } = placeWordsInGrid(listOfWords, 20, 15);
       setRandLetters(grid);
-      let listOfPlayers = setPlayerColors()
-      setPlayers(listOfPlayers)
-      changeColor(listOfPlayers.find((user) => user.socketId === socket.id).color)
-      socket.emit("set-board", { grid: grid, wordsPlaced: wordsPlaced, listOfPlayers: listOfPlayers });
+      let listOfPlayers = setPlayerColors();
+      setPlayers(listOfPlayers);
+      changeColor(
+        listOfPlayers.find((user) => user.socketId === socket.id).color
+      );
+      socket.emit("set-board", {
+        grid: grid,
+        wordsPlaced: wordsPlaced,
+        listOfPlayers: listOfPlayers,
+      });
       setLoading(false);
     }
   }, []);
@@ -866,37 +884,43 @@ export default function Game({ users, socket }) {
       if (!isHost) {
         setWordsToFind(data.wordsPlaced);
         setRandLetters(data.grid);
-        setPlayers(data.listOfPlayers)
-        changeColor(data.listOfPlayers.find((user) => user.socketId === socket.id).color)
+        setPlayers(data.listOfPlayers);
+        changeColor(
+          data.listOfPlayers.find((user) => user.socketId === socket.id).color
+        );
         setLoading(false);
       }
     });
-  
-    socket.on('completeWord', (data) => {
-      setWordsToFind(data.wordsToFind)
-      setCompletedWords(data.completedWords)
-    })
-  
+
+    socket.on("completeWord", (data) => {
+      setWordsToFind(data.wordsToFind);
+      setCompletedLetters(data.completedWords);
+      setPlayers(data.updatedPlayers)
+    });
+
     socket.on("receive-message", (data) => {
       console.log(data);
       if (data.author !== username) {
         const newMessage = {
           author: data.author,
           message: data.message,
-          color: data.color || 'bg-white'
+          color: data.color || "bg-white",
         };
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       } else {
         const newMessage = {
           author: "You",
           message: data.message,
-          color: data.color || 'bg-white'
+          color: data.color || "bg-white",
         };
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       }
     });
-  },[changeColor, isHost, socket, username])
 
+    socket.on('endGame', (data) => {
+      endGame(data)
+    })
+  }, [changeColor, isHost, socket, username]);
 
   const sendMessage = (newMessage) => {
     socket.emit("send-message", newMessage);
@@ -953,7 +977,7 @@ export default function Game({ users, socket }) {
       let attempts = 0;
       let placed = false;
 
-      while (attempts < 50 && wordsPlaced.length !== 15) {
+      while (attempts < 50 && wordsPlaced.length !== 5) {
         startRow = Math.floor(Math.random() * numRows);
         startCol = Math.floor(Math.random() * numCols);
 
@@ -977,13 +1001,13 @@ export default function Game({ users, socket }) {
     setWordsToFind(wordsPlaced);
 
     // Fill remaining empty cells with random letters
-    for (let row = 0; row < numRows; row++) {
-      for (let col = 0; col < numCols; col++) {
-        if (grid[row][col] === "") {
-          grid[row][col] = generateRandomLetter();
-        }
-      }
-    }
+    // for (let row = 0; row < numRows; row++) {
+    //   for (let col = 0; col < numCols; col++) {
+    //     if (grid[row][col] === "") {
+    //       grid[row][col] = generateRandomLetter();
+    //     }
+    //   }
+    // }
 
     return { grid: grid, wordsPlaced: wordsPlaced };
   }
@@ -994,7 +1018,7 @@ export default function Game({ users, socket }) {
     return (
       <div className="flex flex-col items-center my-10">
         <h1 className="text-2xl font-bold">Word Search</h1>
-        <div className="flex justify-center items-start mt-10 gap-24">
+        <div className="flex justify-center items-start mt-10 gap-12">
           <div className="border-slate-800 border p-2">
             <h2 className="text-xl font-bold underline ">Word Bank</h2>
             {wordsToFind.map((word, index) => (
@@ -1015,7 +1039,16 @@ export default function Game({ users, socket }) {
               isComplete={checkIfComplete}
             />
           </div>
-          <ChatBox messages={messages} sendMessage={sendMessage} color={color} />
+          <div className="">
+            <Users users={players} leaderBoard={true} />
+          </div>
+        </div>
+        <div className="mt-10 w-6/12">
+          <ChatBox
+            messages={messages}
+            sendMessage={sendMessage}
+            color={color}
+          />
         </div>
       </div>
     );

@@ -5,13 +5,7 @@ import ChatBox from "../ChatBox";
 import { useRouter } from "next/navigation";
 import Users from "../Users";
 
-
-export default function Lobby({
-  onReload,
-  startGame,
-  roomId,
-  socket,
-}) {
+export default function Lobby({ onReload, startGame, roomId, socket, returning = false, leaveLobby }) {
   const { username, socketId, currentRoom, isHost, changeRoom } =
     useSessionStore();
   const [users, setUsers] = useState();
@@ -29,7 +23,6 @@ export default function Lobby({
         });
       } else {
         socket.current.emit("close-room", { id: currentRoom });
-        onReload();
       }
     };
 
@@ -45,53 +38,53 @@ export default function Lobby({
   }, []);
 
   useEffect(() => {
-    if (isHost) {
-      console.log("creating room");
-      socket.current.emit("create-room", {
-        id: socket.current.id,
-        username: username,
-      });
-      setUsers([
-        {
+    if(!returning){
+      if (isHost) {
+        console.log("creating room");
+        socket.current.emit("create-room", {
+          id: socket.current.id,
+          username: username,
+        });
+        setUsers([
+          {
+            username: username,
+            socketId: socket.current.id,
+          },
+        ]);
+      } else {
+        console.log("joining room");
+        socket.current.emit("join-room", {
+          id: roomId,
           username: username,
           socketId: socket.current.id,
-        },
-      ]);
-    } else {
-      console.log("joining room");
-      socket.current.emit("join-room", {
-        id: roomId,
-        username: username,
-        socketId: socket.current.id,
-      });
+        });
+      }
     }
+    socket.current.on("userJoined", (data) => {
+      setUsers(data);
+    });
+    socket.current.on("roomClosed", () => {
+      onReload();
+    });
+    socket.current.on("receive-message", (data) => {
+      if (data.author !== username) {
+        const newMessage = {
+          author: data.author,
+          message: data.message,
+        };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      } else {
+        const newMessage = {
+          author: "You",
+          message: data.message,
+        };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      }
+    });
+    socket.current.on("gameStart", (data) => {
+      startGame(data);
+    });
   }, []);
-
-
-  socket.current.on("userJoined", (data) => {
-    setUsers(data);
-  });
-  socket.current.on("roomClosed", () => {
-    onReload();
-  });
-  socket.current.on("receive-message", (data) => {
-    if (data.author !== username) {
-      const newMessage = {
-        author: data.author,
-        message: data.message,
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-    } else {
-      const newMessage = {
-        author: "You",
-        message: data.message,
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-    }
-  });
-  socket.current.on('gameStart', (data) => {
-    startGame(data)
-  })
 
   const sendMessage = (newMessage) => {
     socket.current.emit("send-message", newMessage);
@@ -102,9 +95,9 @@ export default function Lobby({
   };
 
   const beginGame = () => {
-    startGame(users)
-    socket.current.emit('start-game')
-  }
+    startGame(users);
+    socket.current.emit("start-game");
+  };
 
   if (loading) {
     return <div>loading</div>;
@@ -116,7 +109,7 @@ export default function Lobby({
           <p className="text-lg">Share The Room ID</p>
           <div className="flex gap-2 w-2/6 justify-center items-center">
             <input
-              className="mt-2 basicInput text-center text-lg"
+              className=" basicInput text-center text-lg"
               type="text"
               readOnly
               defaultValue={roomId}
@@ -133,13 +126,13 @@ export default function Lobby({
         <main className="mt-3 flex justify-center">
           <div className="w-5/6 basicContainer flex flex-col">
             {roomId === socket.current.id && (
-              <button
-                onClick={() => beginGame()}
-                className="basicBtn self-end"
-              >
+              <button onClick={() => beginGame()} className="basicBtn self-end mb-3">
                 Start Game
               </button>
             )}
+              <button onClick={() => leaveLobby()} className="basicBtn self-end">
+                {isHost ? "End Lobby": "Leave Lobby"}
+              </button>
             <div className="mt-5 flex justify-center gap-16 items-start">
               <div className="w-1/6">
                 <Users users={users} />

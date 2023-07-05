@@ -32,7 +32,7 @@
 }
 
 .basicBtn {
-  @apply p-2 outline-none shadow-md rounded-md bg-slate-800 hover:bg-slate-700 text-white
+  @apply p-2 outline-none shadow-md rounded-md cursor-pointer bg-slate-800 hover:bg-slate-700 text-white
 }
 
 .basicContainer {

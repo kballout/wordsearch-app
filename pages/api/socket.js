@@ -83,6 +83,14 @@ export default function SocketHandler(req, res) {
                 io.in(data.currentRoom).emit('completeWord', data)
             })
 
+            socket.on('gameOver', (data) => {
+                io.in(data.currentRoom).emit('endGame', data.players)
+            })
+
+            socket.on('return-to-lobby', (data) => {
+                io.in(data.currentRoom).emit('returnToLobby')
+            })
+
             socket.on('disconnect', async () => {
                 if (usersMap.has(socket.id)) {
                     //host
