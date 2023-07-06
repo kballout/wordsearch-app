@@ -10,7 +10,7 @@ export default function SocketHandler(req, res) {
         return res.end();
     } else {
         const io = new Server(res.socket.server, {
-            path: '/api/socket_io',
+            path: '/api/socket',
             addTrailingSlash: false,
             pingInterval: 2000,
             pingTimeout: 2000

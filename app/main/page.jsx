@@ -32,7 +32,7 @@ export default function Main() {
   //listeners
   useEffect(() => {
     socket.current = io("https://wordsearch-app.vercel.app/", {
-      path: "/api/socket_io",
+      path: "/api/socket",
     });
 
     socket.current.on("connect", () => {
