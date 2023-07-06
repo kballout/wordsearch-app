@@ -9,7 +9,6 @@ const ChatBox = ({messages, sendMessage, color}) => {
 
   const { username, currentRoom } = useSessionStore();
 
-
  
 
   const handleInputChange = (e) => {

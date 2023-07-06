@@ -4,53 +4,54 @@ import React, { useEffect, useRef, useState } from "react";
 import ChatBox from "../ChatBox";
 import { useRouter } from "next/navigation";
 import Users from "../Users";
+import { toast } from "react-toastify";
 
-export default function Lobby({ onReload, startGame, roomId, socket, returning = false, leaveLobby }) {
+export default function Lobby({ startGame, roomId, socket, returning = false, leaveLobby, users, messages }) {
   const { username, socketId, currentRoom, isHost, changeRoom } =
     useSessionStore();
-  const [users, setUsers] = useState();
-  const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
+      event.preventDefault()
       if (!isHost) {
-        setUsers([]);
-        socket.current.emit("leave-room", {
-          id: currentRoom,
-          username: username,
-          socketId: socket.current.id,
-        });
+        leaveLobby()
       } else {
         socket.current.emit("close-room", { id: currentRoom });
       }
     };
 
+    const shortcutInput = (event) => {
+      if (event.altKey && event.key === "ArrowLeft") {
+        if (!isHost) {
+          leaveLobby()
+        } else {
+          socket.current.emit("close-room", { id: currentRoom });
+        }
+      }
+    }
+
     window.addEventListener("beforeunload", handleBeforeUnload);
     window.addEventListener("popstate", handleBeforeUnload);
+    window.addEventListener("keydown", shortcutInput)
     // window.addEventListener("unload", handleBeforeUnload);
 
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handleBeforeUnload);
+      window.removeEventListener("keydown", shortcutInput);
       // window.removeEventListener("unload", handleBeforeUnload);
     };
   }, []);
 
   useEffect(() => {
-    if(!returning){
+    if (!returning) {
       if (isHost) {
         console.log("creating room");
         socket.current.emit("create-room", {
           id: socket.current.id,
           username: username,
         });
-        setUsers([
-          {
-            username: username,
-            socketId: socket.current.id,
-          },
-        ]);
       } else {
         console.log("joining room");
         socket.current.emit("join-room", {
@@ -60,30 +61,6 @@ export default function Lobby({ onReload, startGame, roomId, socket, returning =
         });
       }
     }
-    socket.current.on("userJoined", (data) => {
-      setUsers(data);
-    });
-    socket.current.on("roomClosed", () => {
-      onReload();
-    });
-    socket.current.on("receive-message", (data) => {
-      if (data.author !== username) {
-        const newMessage = {
-          author: data.author,
-          message: data.message,
-        };
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      } else {
-        const newMessage = {
-          author: "You",
-          message: data.message,
-        };
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      }
-    });
-    socket.current.on("gameStart", (data) => {
-      startGame(data);
-    });
   }, []);
 
   const sendMessage = (newMessage) => {
@@ -92,6 +69,7 @@ export default function Lobby({ onReload, startGame, roomId, socket, returning =
 
   const handleCopyId = async () => {
     await navigator.clipboard.writeText(currentRoom);
+    toast.success("ID has been copied!", { autoClose: 2000, theme: 'dark' })
   };
 
   const beginGame = () => {
@@ -130,15 +108,15 @@ export default function Lobby({ onReload, startGame, roomId, socket, returning =
                 Start Game
               </button>
             )}
-              <button onClick={() => leaveLobby()} className="basicBtn self-end">
-                {isHost ? "End Lobby": "Leave Lobby"}
-              </button>
+            <button onClick={() => leaveLobby()} className="basicBtn self-end">
+              {isHost ? "End Lobby" : "Leave Lobby"}
+            </button>
             <div className="mt-5 flex justify-center gap-16 items-start">
               <div className="w-1/6">
                 <Users users={users} />
               </div>
               <div className="w-4/6">
-                <ChatBox messages={messages} sendMessage={sendMessage} />
+                <ChatBox messages={messages} sendMessage={sendMessage} color={'bg-white'} />
               </div>
             </div>
           </div>

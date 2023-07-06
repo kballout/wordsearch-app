@@ -20,41 +20,64 @@ export default function SocketHandler(req, res) {
             console.log(`new connection from ${socket.id}`);
 
             socket.on('create-room', (data) => {
-                usersMap.set(data.id, [{
-                    username: data.username,
-                    socketId: data.id
-                }])
+                usersMap.set(data.id, {
+                    started: false,
+                    users: [{
+                        username: data.username,
+                        socketId: data.id
+                    }]
+                })
                 currentUsers.push({
                     socketId: data.id,
                     currentRoom: data.id
                 })
             })
 
+            socket.on('check-room', (data) => {
+                let obj = usersMap.get(data.id)
+                if (!obj || obj?.users.length === 0) {
+                    socket.emit('errorJoining')
+                } else {
+                    if (obj.started === true) {
+                        socket.emit('gameAlreadyStarted')
+                    } else {
+                        socket.emit('validLobby', { id: data.id })
+                    }
+                }
+            })
+
             socket.on('join-room', (data) => {
                 console.log('user has joined');
-                socket.join(data.id)
-                let arr = usersMap.get(data.id)
-                currentUsers.push({
-                    socketId: data.socketId,
-                    currentRoom: data.id
-                })
-                arr.push({
-                    username: data.username,
-                    socketId: data.socketId
-                })
-                usersMap.set(data.id, arr)
-                
-                io.in(data.id).emit('userJoined', arr)
+                let obj = usersMap.get(data.id)
+                if (obj) {
+                    socket.join(data.id)
+                    currentUsers.push({
+                        socketId: data.socketId,
+                        currentRoom: data.id
+                    })
+                    let update = {
+                        ...obj, users: [...obj.users, {
+                            username: data.username,
+                            socketId: data.socketId
+                        }]
+                    }
+                    usersMap.set(data.id, update)
+                    io.in(data.id).emit('userJoined', { arr: update.users, data: data })
+                }
             })
 
             socket.on('leave-room', (data) => {
                 console.log('user left');
                 socket.leave(data.id)
-                let arr = usersMap.get(data.id)
-                arr = arr.filter((user) => user.socketId !== data.socketId)
+                let obj = usersMap.get(data.id)
+                let update = { ...obj, users: obj.users.filter((user) => user.socketId !== data.socketId) }
                 currentUsers = currentUsers.filter((user) => user.socketId !== data.socketId)
-                usersMap.set(data.id, arr)
-                io.in(data.id).emit('userJoined', arr)
+                usersMap.set(data.id, update)
+                io.in(data.id).emit('userLeft', { arr: update.users, data: data })
+                if (update.started === true) {
+                    //send to game
+                    io.in(data.id).emit('userLeftInGame', data)
+                }
             })
 
             socket.on('close-room', (data) => {
@@ -64,10 +87,12 @@ export default function SocketHandler(req, res) {
                 io.in(data.id).emit('roomClosed')
             })
 
-            
+
             socket.on('start-game', () => {
-                let arr = usersMap.get(socket.id)
-                io.in(socket.id).emit('gameStart', arr)
+                let obj = usersMap.get(socket.id)
+                let update = { ...obj, started: true }
+                usersMap.set(socket.id, update)
+                io.in(socket.id).emit('gameStart', update.users)
             })
 
             socket.on('set-board', (data) => {
@@ -84,6 +109,9 @@ export default function SocketHandler(req, res) {
             })
 
             socket.on('gameOver', (data) => {
+                let obj = usersMap.get(socket.id)
+                let update = { ...obj, started: false }
+                usersMap.set(socket.id, update)
                 io.in(data.currentRoom).emit('endGame', data.players)
             })
 
@@ -104,11 +132,20 @@ export default function SocketHandler(req, res) {
                     let find = currentUsers.find((user) => user.socketId === socket.id)
                     if (find) {
                         socket.leave(find.currentRoom)
-                        let arr = usersMap.get(find.currentRoom)
-                        arr = arr.filter((user) => user.socketId !== find.socketId)
+                        let obj = usersMap.get(find.currentRoom)
+                        let data = {
+                            id: find.currentRoom,
+                            socketId: socket.id,
+                            username: obj.users.find((us) => us.socketId === find.socketId).username
+                        }
+                        let update = { ...obj, users: obj.users.filter((user) => user.socketId !== find.socketId) }
                         currentUsers = currentUsers.filter((user) => user.socketId !== find.socketId)
-                        usersMap.set(find.currentRoom, arr)
-                        io.in(find.currentRoom).emit('userJoined', arr)
+                        usersMap.set(find.currentRoom, update)
+                        io.in(find.currentRoom).emit('userLeft', { arr: update.users, data: data })
+                        if (update.started === true) {
+                            //send to game
+                            io.in(data.id).emit('userLeftInGame', data)
+                        }
                     }
                 }
             })

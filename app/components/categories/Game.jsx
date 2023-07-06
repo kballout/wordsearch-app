@@ -5,11 +5,10 @@ import useSessionStore from "@/utils/store";
 import ChatBox from "../ChatBox";
 import Users from "../Users";
 
-export default function Game({ users, socket, endGame }) {
+export default function Game({ users, socket, endGame, leaveLobby, messages}) {
   const { isHost, changeColor, color, username, currentRoom } =
     useSessionStore();
   const [players, setPlayers] = useState(users);
-  const [messages, setMessages] = useState([]);
   const [randLetters, setRandLetters] = useState();
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +25,6 @@ export default function Game({ users, socket, endGame }) {
   const handleLetterClick = (rowIndex, colIndex) => {
     clickRef.current = true;
     if (isHighlighting) {
-      console.log(getWord());
       setIsHighlighting(false);
       setDirection(null);
       setHighlightedCells([]);
@@ -781,9 +779,8 @@ export default function Game({ users, socket, endGame }) {
         updatedPlayers: updatedPlayers
       });
       //check if game over
-      console.log(wordsToFind);
       if(newWordsToFind.filter((w) => w.complete !== true).length === 0){
-        socket.emit('gameOver', {players: players, currentRoom: currentRoom})
+        socket.emit('gameOver', {players: updatedPlayers, currentRoom: currentRoom})
       }
     }
 
@@ -812,6 +809,69 @@ export default function Game({ users, socket, endGame }) {
     }
     return listOfPlayers;
   }
+
+   //leaving listeners
+   useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault()
+      if (!isHost) {
+        leaveLobby()
+      } else {
+        socket.emit("close-room", { id: currentRoom });
+      }
+    };
+
+    const shortcutInput = (event) => {
+      if (event.altKey && event.key === "ArrowLeft") {
+        if (!isHost) {
+          leaveLobby()
+        } else {
+          socket.emit("close-room", { id: currentRoom });
+        }
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handleBeforeUnload);
+    window.addEventListener("keydown", shortcutInput)
+    // window.addEventListener("unload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handleBeforeUnload);
+      window.removeEventListener("keydown", shortcutInput);
+      // window.removeEventListener("unload", handleBeforeUnload);
+    };
+  }, []);
+
+  //socket listeners
+  useEffect(() => {
+    socket.on("boardSet", (data) => {
+      if (!isHost) {
+        setWordsToFind(data.wordsPlaced);
+        setRandLetters(data.grid);
+        setPlayers(data.listOfPlayers);
+        changeColor(
+          data.listOfPlayers.find((user) => user.socketId === socket.id).color
+        );
+        setLoading(false);
+      }
+    });
+
+    socket.on("completeWord", (data) => {
+      setWordsToFind(data.wordsToFind);
+      setCompletedLetters(data.completedWords);
+      setPlayers(data.updatedPlayers)
+    });
+
+    socket.on('userLeftInGame', (data) => {
+      setPlayers(players.filter((user) => user.socketId !== data.socketId))
+    })
+
+    socket.on('endGame', (data) => {
+      endGame(data)
+    })
+  }, [changeColor, endGame, isHost, socket, username]);
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -878,49 +938,7 @@ export default function Game({ users, socket, endGame }) {
     }
   }, []);
 
-  //socket listeners
-  useEffect(() => {
-    socket.on("boardSet", (data) => {
-      if (!isHost) {
-        setWordsToFind(data.wordsPlaced);
-        setRandLetters(data.grid);
-        setPlayers(data.listOfPlayers);
-        changeColor(
-          data.listOfPlayers.find((user) => user.socketId === socket.id).color
-        );
-        setLoading(false);
-      }
-    });
-
-    socket.on("completeWord", (data) => {
-      setWordsToFind(data.wordsToFind);
-      setCompletedLetters(data.completedWords);
-      setPlayers(data.updatedPlayers)
-    });
-
-    socket.on("receive-message", (data) => {
-      console.log(data);
-      if (data.author !== username) {
-        const newMessage = {
-          author: data.author,
-          message: data.message,
-          color: data.color || "bg-white",
-        };
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      } else {
-        const newMessage = {
-          author: "You",
-          message: data.message,
-          color: data.color || "bg-white",
-        };
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      }
-    });
-
-    socket.on('endGame', (data) => {
-      endGame(data)
-    })
-  }, [changeColor, isHost, socket, username]);
+ 
 
   const sendMessage = (newMessage) => {
     socket.emit("send-message", newMessage);
@@ -975,9 +993,8 @@ export default function Game({ users, socket, endGame }) {
         directions[Math.floor(Math.random() * directions.length)];
       let startRow, startCol;
       let attempts = 0;
-      let placed = false;
 
-      while (attempts < 50 && wordsPlaced.length !== 5) {
+      while (attempts < 50 && wordsPlaced.length !== 15) {
         startRow = Math.floor(Math.random() * numRows);
         startCol = Math.floor(Math.random() * numCols);
 
@@ -992,7 +1009,6 @@ export default function Game({ users, socket, endGame }) {
             grid[row][col] = word[i];
           }
           wordsPlaced.push({ word: word, complete: false });
-          placed = true;
           break;
         }
         attempts++;
@@ -1001,13 +1017,13 @@ export default function Game({ users, socket, endGame }) {
     setWordsToFind(wordsPlaced);
 
     // Fill remaining empty cells with random letters
-    // for (let row = 0; row < numRows; row++) {
-    //   for (let col = 0; col < numCols; col++) {
-    //     if (grid[row][col] === "") {
-    //       grid[row][col] = generateRandomLetter();
-    //     }
-    //   }
-    // }
+    for (let row = 0; row < numRows; row++) {
+      for (let col = 0; col < numCols; col++) {
+        if (grid[row][col] === "") {
+          grid[row][col] = generateRandomLetter();
+        }
+      }
+    }
 
     return { grid: grid, wordsPlaced: wordsPlaced };
   }
