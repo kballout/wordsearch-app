@@ -25,6 +25,7 @@ export default function Game({ users, socket, endGame, leaveLobby, messages}) {
   const handleLetterClick = (rowIndex, colIndex) => {
     clickRef.current = true;
     if (isHighlighting) {
+      getWord()
       setIsHighlighting(false);
       setDirection(null);
       setHighlightedCells([]);

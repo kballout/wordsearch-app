@@ -2,12 +2,10 @@
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import useSessionStore from "../../utils/store";
-import { useRouter } from "next/navigation";
 import MainPage from "../components/categories/MainPage";
 import Lobby from "../components/categories/Lobby";
 import Game from "../components/categories/Game";
 import { io } from "socket.io-client";
-import useSocket from "../hooks/useSocket";
 import GameOver from "../components/categories/GameOver";
 import { toast } from "react-toastify";
 
@@ -27,11 +25,10 @@ export default function Main() {
   const [roomId, setRoomId] = useState();
   const [returning, setReturning] = useState(false);
   let socket = useRef();
-  useSocket();
 
   //listeners
   useEffect(() => {
-    socket.current = io("https://wordsearch-app.vercel.app/", {
+    socket.current = io(process.env.SERVER, {
       path: "/api/socket",
     });
 
