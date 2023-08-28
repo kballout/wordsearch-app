@@ -32,14 +32,14 @@
 }
 
 .basicBtn {
-  @apply p-2 outline-none shadow-md rounded-md cursor-pointer bg-slate-800 hover:bg-slate-700 text-white
+  @apply p-2 outline-none shadow-md rounded-md cursor-pointer font-bold bg-slate-800 hover:bg-slate-700 text-white
 }
 
 .basicContainer {
-  @apply p-3 rounded-md bg-blue-200
+  @apply p-3 rounded-md bg-blue-300
 }
 
 .submitBtn {
-  @apply px-4 py-2 bg-blue-500 text-white rounded-r-md cursor-pointer hover:bg-blue-600 focus:outline-none
+  @apply px-4 py-2 bg-blue-500 text-white rounded-r-md cursor-pointer font-bold hover:bg-blue-600 focus:outline-none
 }
 

@@ -16,7 +16,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${aleo.className} bg-slate-200`}>
+      <body className={`${aleo.className} bg-sky-200`}>
         <ToastProvider>
           {children}
         </ToastProvider>

@@ -62,7 +62,7 @@ const ChatBox = ({messages, sendMessage, color}) => {
           onChange={handleInputChange}
         />
         <input
-          className="submitBtn w-1/12"
+          className="submitBtn"
           type="submit"
           value={"Send"}
         />
