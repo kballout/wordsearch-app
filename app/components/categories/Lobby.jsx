@@ -11,38 +11,40 @@ export default function Lobby({ startGame, roomId, socket, returning = false, le
     useSessionStore();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      event.preventDefault()
-      if (!isHost) {
-        leaveLobby()
-      } else {
-        socket.current.emit("close-room", { id: currentRoom });
-      }
-    };
+  // useEffect(() => {
+  //   const handleBeforeUnload = (event) => {
+  //     event.preventDefault()
+  //     console.log('event');
+  //     if (!isHost) {
+  //       leaveLobby()
+  //     } else {
+  //       socket.current.emit("close-room", { id: currentRoom });
+  //     }
+  //   };
 
-    const shortcutInput = (event) => {
-      if (event.altKey && event.key === "ArrowLeft") {
-        if (!isHost) {
-          leaveLobby()
-        } else {
-          socket.current.emit("close-room", { id: currentRoom });
-        }
-      }
-    }
+  //   const shortcutInput = (event) => {
+  //     if (event.altKey && event.key === "ArrowLeft") {
+  //       console.log('event');
+  //       if (!isHost) {
+  //         leaveLobby()
+  //       } else {
+  //         socket.current.emit("close-room", { id: currentRoom });
+  //       }
+  //     }
+  //   }
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("popstate", handleBeforeUnload);
-    window.addEventListener("keydown", shortcutInput)
-    // window.addEventListener("unload", handleBeforeUnload);
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
+  //   window.addEventListener("popstate", handleBeforeUnload);
+  //   window.addEventListener("keydown", shortcutInput)
+  //   // window.addEventListener("unload", handleBeforeUnload);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("popstate", handleBeforeUnload);
-      window.removeEventListener("keydown", shortcutInput);
-      // window.removeEventListener("unload", handleBeforeUnload);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //     window.removeEventListener("popstate", handleBeforeUnload);
+  //     window.removeEventListener("keydown", shortcutInput);
+  //     // window.removeEventListener("unload", handleBeforeUnload);
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (!returning) {
@@ -84,8 +86,8 @@ export default function Lobby({ startGame, roomId, socket, returning = false, le
       <div className="w-full">
         <h1 className="text-center font-bold mt-3 text-2xl">Welcome</h1>
         <header className="mt-4 flex flex-col items-center">
-          <p className="text-lg">Share The Room ID</p>
           <div className="flex gap-2 w-2/6 justify-center items-center">
+            <p className="text-lg">Room ID:</p>
             <input
               className=" basicInput text-center text-lg"
               type="text"
@@ -102,21 +104,23 @@ export default function Lobby({ startGame, roomId, socket, returning = false, le
           </div>
         </header>
         <main className="mt-3 flex justify-center">
-          <div className="w-5/6 basicContainer flex flex-col">
-            {roomId === socket.current.id && (
-              <button onClick={() => beginGame()} className="basicBtn self-end mb-3">
-                Start Game
-              </button>
-            )}
-            <button onClick={() => leaveLobby()} className="basicBtn self-end">
-              {isHost ? "End Lobby" : "Leave Lobby"}
-            </button>
-            <div className="mt-5 flex justify-center gap-16 items-start">
+          <div className="w-5/6 basicContainer">
+            <div className="mt-5 flex gap-16 items-start ">
               <div className="w-1/6">
                 <Users users={users} />
               </div>
               <div className="w-4/6">
                 <ChatBox messages={messages} sendMessage={sendMessage} color={'bg-white'} />
+              </div>
+              <div className="flex items-center justify-center gap-5 w-1/6 mr-10">
+                {roomId === socket.current.id && (
+                  <button onClick={() => beginGame()} className="basicBtn">
+                    Start Game
+                  </button>
+                )}
+                <button onClick={() => leaveLobby()} className="basicBtn">
+                  {isHost ? "End Lobby" : "Leave Lobby"}
+                </button>
               </div>
             </div>
           </div>
