@@ -9,6 +9,7 @@ import { io } from "socket.io-client";
 import GameOver from "../components/categories/GameOver";
 import { toast } from "react-toastify";
 
+
 export default function Main() {
   const {
     socketId,
@@ -28,7 +29,7 @@ export default function Main() {
 
   //listeners
   useEffect(() => {
-    socket.current = io(process.env.SERVER, {
+    socket.current = io(process.env.NEXT_PUBLIC_SITE_URL, {
       path: "/api/socket",
     });
 
@@ -49,7 +50,7 @@ export default function Main() {
     });
 
     socket.current.on('gameAlreadyStarted', () => {
-      toast.error('The game is already in session', {autoClose: 2000, theme: 'dark'})
+      toast.error('The game is already in session', { autoClose: 2000, theme: 'dark' })
     })
 
     socket.current.on("errorJoining", () => {
@@ -59,12 +60,12 @@ export default function Main() {
     //lobby
     socket.current.on("userJoined", (data) => {
       setPlayers(data.arr);
-      if(data.data.socketId !== socket.current.id){
-        toast.success(`${data.data.username} has joined the lobby`, {autoClose: 2000, theme: 'dark'})
+      if (data.data.socketId !== socket.current.id) {
+        toast.success(`${data.data.username} has joined the lobby`, { autoClose: 2000, theme: 'dark' })
       }
     });
     socket.current.on('userLeft', (data) => {
-      toast.success(`${data.data.username} has left the lobby`, {autoClose: 2000, theme: 'dark'})
+      toast.success(`${data.data.username} has left the lobby`, { autoClose: 2000, theme: 'dark' })
       setPlayers(data.arr);
     })
     socket.current.on("roomClosed", () => {
@@ -92,8 +93,9 @@ export default function Main() {
     });
 
 
-    return () => socket.current.off("connect");
+    return () => socket.current.close()
   }, [socket]);
+
 
   function joinLobby(e, id) {
     e.preventDefault();
@@ -135,6 +137,7 @@ export default function Main() {
   }
 
   function leaveLobby() {
+    console.log('left lobby');
     if (isHost) {
       socket.current.emit("close-room", { id: currentRoom });
     } else {
